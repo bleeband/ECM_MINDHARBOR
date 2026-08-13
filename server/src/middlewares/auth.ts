@@ -8,6 +8,7 @@ export const requireAuth: RequestHandler = (req, _res, next) => {
   if (!header) {
     return next(new AppError(401, "UNAUTHENTICATED", "Token manquant."));
   }
+  
 
   const [type, token] = header.split(" ");
 
@@ -24,3 +25,30 @@ export const requireAuth: RequestHandler = (req, _res, next) => {
     next(new AppError(401, "INVALID_TOKEN", "Token invalide ou expiré."));
   }
 };
+
+// accepte 1 ou plusieurs roles en parametre
+export function requireRole(...roles: string[]): RequestHandler {
+  return (req, _res, next) => {
+    if (!req.user) {
+      return next(
+        new AppError(
+          401,
+          "UNAUTHENTICATED",
+          "Authentification requise."
+        )
+      );
+    }
+
+    if (!roles.includes(req.user.role)) {
+      return next(
+        new AppError(
+          403,
+          "FORBIDDEN",
+          "Vous n'avez pas les permissions nécessaires."
+        )
+      );
+    }
+
+    next();
+  };
+}

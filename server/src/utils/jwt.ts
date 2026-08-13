@@ -50,3 +50,20 @@ export function verifyAccessToken(token: string): TokenPayload {
     role: decoded.role,
   };
 }
+
+export function verifyRefreshToken(token: string): TokenPayload {
+  const decoded = jwt.verify(token, refreshSecret);
+
+  if (
+    typeof decoded === "string" ||
+    typeof decoded.userId !== "number" ||
+    typeof decoded.role !== "string"
+  ) {
+    throw new Error("Refresh token invalide");
+  }
+
+  return {
+    userId: decoded.userId,
+    role: decoded.role,
+  };
+}
