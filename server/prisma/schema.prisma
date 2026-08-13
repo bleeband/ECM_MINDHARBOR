@@ -11,3 +11,115 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model User {
+    id String @id @default(cuid())
+    username String @unique
+    email String @unique
+    motdepasse String?
+    role Role @default(VISITEUR)
+
+}
+
+model JournalEntry {
+    id String @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    humeur Int 
+    energie Int
+    qualite_sommeil Int
+    anxiete_stress Int
+
+}
+
+model Activity {
+    id String @id @default(cuid())
+
+}
+
+model JournalActivity {
+    id String @id @default(cuid())
+
+}
+
+model Resource {
+    id Int @id @default(autoincrement())
+    type TypeResource
+
+}
+
+model Favorite {
+    id String @id @default(cuid())
+
+}
+
+model Group {
+    id String @id @default(cuid())
+
+}
+
+model GroupMember {
+    id String @id @default(cuid())
+
+}
+
+model Post {
+    id String @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    titre String
+    contenu String
+    visibilite Visibilite @default(PRIVE)
+
+}
+
+model Comment {
+    id String @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    body String
+}
+
+model Message {
+    id String @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    titre String
+    contenu String
+}
+
+model Report {
+    id String @id @default(cuid())
+    emetteur User 
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    contenu String
+
+
+}
+
+model RefreshToken {
+    id String @id @default(cuid())
+
+
+}
+
+// -----ENUMS-----
+
+enum TypeResource {
+    ARTICLE
+    EXERCICE
+    FICHE_PRATIQUE
+}
+
+enum Role {
+    VISITEUR
+    UTILISATEUR
+    MODERATEUR
+    ADMINISTRATEUR
+}
+
+enum Visibilite {
+    PUBLIQUE
+    PRIVE
+}
