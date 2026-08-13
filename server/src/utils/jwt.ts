@@ -33,3 +33,20 @@ export function createRefreshToken(payload: TokenPayload) {
     expiresIn: "7d",
   });
 }
+
+export function verifyAccessToken(token: string): TokenPayload {
+  const decoded = jwt.verify(token, accessSecret);
+
+  if (
+    typeof decoded === "string" ||
+    typeof decoded.userId !== "number" ||
+    typeof decoded.role !== "string"
+  ) {
+    throw new Error("Token invalide");
+  }
+
+  return {
+    userId: decoded.userId,
+    role: decoded.role,
+  };
+}
