@@ -1,0 +1,19 @@
+### Inscription valide
+POST http://localhost:3000/api/v1/auth/register
+Content-Type: application/json
+
+{
+  "email": "charles@gmail.com",
+  "password": "Qwerty123",
+  "pseudonyme": "Charles"
+}
+
+### Inscription invalide
+POST http://localhost:3000/api/v1/auth/register
+Content-Type: application/json
+
+{
+  "email": "in-co-rect",
+  "password": "qwerty",
+  "pseudonyme": "Charles"
+}
