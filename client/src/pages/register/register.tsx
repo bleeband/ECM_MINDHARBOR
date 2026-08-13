@@ -1,41 +1,231 @@
-import { useAuth } from "../../context/AuthContext.tsx";
-import { api } from "../../api/axios.ts";
-import { useState } from "react";
+import { useState, type ChangeEvent, type FormEvent } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { UserPlus } from "lucide-react";
 
-function Register() {
-  const { seConnecter } = useAuth();
-  const [username, setUsername] = useState("");
-  const [pwd, setPassword] = useState("");
+type RegisterForm = {
+  email: string;
+  displayName: string;
+  password: string;
+  confirmPassword: string;
+};
+
+export default function RegisterPage() {
+  const navigate = useNavigate();
+
+  const [form, setForm] = useState<RegisterForm>({
+    email: "",
+    displayName: "",
+    password: "",
+    confirmPassword: "",
+  });
+
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  async function handleRegister(e: React.FormEvent) {
-    e.preventDefault();
+  function handleChange(event: ChangeEvent<HTMLInputElement>) {
+    const { name, value } = event.target;
+
+    setForm((current) => ({
+      ...current,
+      [name]: value,
+    }));
+  }
+
+  function validateForm(): string | null {
+    if (!form.email.trim() || !form.displayName.trim() || !form.password || !form.confirmPassword) {
+      return "Veuillez remplir tous les champs.";
+    }
+
+    if (form.displayName.trim().length < 2) {
+      return "Le pseudonyme doit contenir au moins 2 caractères.";
+    }
+
+    if (form.password.length < 8) {
+      return "Le mot de passe doit contenir au moins 8 caractères.";
+    }
+
+    if (!/[A-Z]/.test(form.password)) {
+      return "Le mot de passe doit contenir au moins une majuscule.";
+    }
+
+    if (!/[0-9]/.test(form.password)) {
+      return "Le mot de passe doit contenir au moins un chiffre.";
+    }
+
+    if (form.password !== form.confirmPassword) {
+      return "Les mots de passe ne correspondent pas.";
+    }
+
+    return null;
+  }
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    setError("");
+
+    const validationError = validateForm();
+
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    setIsLoading(true);
+
     try {
-      const response = await api.post("/register", { email: username, password: pwd });
-      const token = response.data.token;
-      seConnecter(token);
-    } catch (err) {
-      setError("Nom d'utilisateur ou mot de passe incorrect");
+      /*
+       * TEMPORAIRE
+       *
+       * À remplacer ensuite par :
+       *
+       * await register({
+       *   email: form.email,
+       *   displayName: form.displayName,
+       *   password: form.password,
+       * });
+       */
+
+      console.log("Inscription :", {
+        email: form.email,
+        displayName: form.displayName,
+      });
+
+      navigate("/login");
+    } catch {
+      setError("La création du compte n'a pas fonctionné. Veuillez réessayer.");
+    } finally {
+      setIsLoading(false);
     }
   }
 
   return (
-    <div>
-      <h1>Register</h1>
-      <form onSubmit={handleRegister}>
-        <div>
-          <label>Username:</label>
-          <input type="text" value={username} placeholder="Entrer votre email" onChange={(e) => setUsername(e.target.value)} />
+    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-12">
+      <div className="w-full max-w-md">
+        <div className="mb-8 text-center">
+          <Link to="/" className="inline-flex items-center gap-2 text-2xl font-bold text-sky-800">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-100">MH</span>
+            MindHarbor
+          </Link>
+
+          <h1 className="mt-8 text-3xl font-bold tracking-tight text-slate-900">Créer votre espace</h1>
+
+          <p className="mt-2 text-slate-600">Commencez votre parcours à votre rythme.</p>
         </div>
-        <div>
-          <label>Password:</label>
-          <input type="password" value={pwd} placeholder="Entrer votre mot de passe" onChange={(e) => setPassword(e.target.value)} />
+
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label htmlFor="displayName" className="mb-2 block text-sm font-medium text-slate-700">
+                Pseudonyme
+              </label>
+
+              <input
+                id="displayName"
+                name="displayName"
+                type="text"
+                autoComplete="nickname"
+                value={form.displayName}
+                onChange={handleChange}
+                placeholder="Ex. Tom_mtl"
+                disabled={isLoading}
+                className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition placeholder:text-slate-400 focus:border-sky-600 focus:ring-2 focus:ring-sky-100 disabled:bg-slate-100"
+              />
+
+              <p className="mt-2 text-xs text-slate-500">Le pseudonyme pourra être utilisé à la place de votre nom réel.</p>
+            </div>
+
+            <div>
+              <label htmlFor="email" className="mb-2 block text-sm font-medium text-slate-700">
+                Courriel
+              </label>
+
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                value={form.email}
+                onChange={handleChange}
+                placeholder="vous@exemple.com"
+                disabled={isLoading}
+                className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition placeholder:text-slate-400 focus:border-sky-600 focus:ring-2 focus:ring-sky-100 disabled:bg-slate-100"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="password" className="mb-2 block text-sm font-medium text-slate-700">
+                Mot de passe
+              </label>
+
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete="new-password"
+                value={form.password}
+                onChange={handleChange}
+                placeholder="Minimum 8 caractères"
+                disabled={isLoading}
+                className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition placeholder:text-slate-400 focus:border-sky-600 focus:ring-2 focus:ring-sky-100 disabled:bg-slate-100"
+              />
+
+              <p className="mt-2 text-xs text-slate-500">Minimum 8 caractères, une majuscule et un chiffre.</p>
+            </div>
+
+            <div>
+              <label htmlFor="confirmPassword" className="mb-2 block text-sm font-medium text-slate-700">
+                Confirmer le mot de passe
+              </label>
+
+              <input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                autoComplete="new-password"
+                value={form.confirmPassword}
+                onChange={handleChange}
+                placeholder="Répétez votre mot de passe"
+                disabled={isLoading}
+                className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition placeholder:text-slate-400 focus:border-sky-600 focus:ring-2 focus:ring-sky-100 disabled:bg-slate-100"
+              />
+            </div>
+
+            {error && (
+              <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+                {error}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-sky-700 px-5 py-3 font-semibold text-white transition hover:bg-sky-800 disabled:cursor-not-allowed disabled:opacity-60">
+              <UserPlus className="h-5 w-5" />
+
+              {isLoading ? "Création du compte..." : "Créer mon compte"}
+            </button>
+          </form>
+
+          <div className="mt-6 border-t border-slate-200 pt-6 text-center text-sm text-slate-600">
+            Vous avez déjà un compte?{" "}
+            <Link to="/login" className="font-semibold text-sky-700 hover:text-sky-900">
+              Se connecter
+            </Link>
+          </div>
+        </section>
+
+        <p className="mt-6 text-center text-xs leading-5 text-slate-500">
+          Vos données personnelles sont traitées avec confidentialité. Vous pourrez modifier vos paramètres de visibilité après votre
+          inscription.
+        </p>
+
+        <div className="mt-3 text-center">
+          <Link to="/emergency" className="text-sm font-semibold text-rose-700 hover:text-rose-900">
+            Besoin d'aide maintenant?
+          </Link>
         </div>
-        <button>S'inscrire</button>
-        {error && <p style={{ color: "red" }}>{error}</p>}
-      </form>
-    </div>
+      </div>
+    </main>
   );
 }
-
-export default Register;

@@ -1,38 +1,85 @@
-import { useState, useContext, createContext } from "react";
+// src/context/AuthContext.tsx
 
-type AuthType = {
-    token: string | null
-    estConnecte : boolean
-    seConnecter: (token: string) => void
-    seDeconnecter: () => void
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+
+type Role = "USER" | "ADMIN";
+
+type AuthUser = {
+  id: string;
+  email: string;
+  displayName: string;
+  role: Role;
 };
 
+type AuthContextType = {
+  user: AuthUser | null;
+  isLoading: boolean;
+  setUser: (user: AuthUser | null) => void;
+  logout: () => void;
+};
 
-const AuthContext = createContext<AuthType>(null as any);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+export function AuthProvider({ children }: { children: ReactNode }) {
+  // const [user, setUser] = useState<AuthUser | null>(null);
+  const [user, setUser] = useState<AuthUser | null>({
+    id: "dev-1",
+    email: "admin@mindharbor.ca",
+    displayName: "Admin Dev",
+    role: "ADMIN",
+  });
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-    const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
+  // temporaire pour simuler le chargement de l'utilisateur
+  const [isLoading, setIsLoading] = useState(true);
+  useEffect(() => {
+    setIsLoading(false);
+  }, []);
 
-    function seConnecter(token: string) {
-        localStorage.setItem("token", token);
-        setToken(token);
-    }
+  //// A remettre quand les endpoints seront disponibles
+  // useEffect(() => {
+  //   async function loadUser() {
+  //     try {
+  //       /*
+  //        * Plus tard :
+  //        *
+  //        * const currentUser = await getMe();
+  //        * setUser(currentUser);
+  //        */
 
-    function seDeconnecter() {
-        localStorage.removeItem("token");
-        setToken(null);
-    }
+  //       setUser(null);
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   }
 
-    const estConnecte = !!token;
+  //   void loadUser();
+  // }, []);
 
-    return (
-        <AuthContext.Provider value={{ token, estConnecte, seConnecter, seDeconnecter }}>
-            {children}
-        </AuthContext.Provider>
-    );
+  function logout() {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    setUser(null);
+  }
+
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        isLoading,
+        setUser,
+        logout,
+      }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
-export const useAuth = () => {
-    return useContext(AuthContext);
+export function useAuth() {
+  const context = useContext(AuthContext);
+
+  if (!context) {
+    throw new Error("useAuth doit être utilisé dans AuthProvider.");
+  }
+
+  return context;
 }
