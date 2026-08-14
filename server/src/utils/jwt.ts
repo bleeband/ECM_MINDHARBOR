@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 
 export type TokenPayload = {
-  userId: number;
+  userId: string;
   role: string;
 };
 
@@ -39,7 +39,7 @@ export function verifyAccessToken(token: string): TokenPayload {
 
   if (
     typeof decoded === "string" ||
-    typeof decoded.userId !== "number" ||
+    typeof decoded.userId !== "string" ||
     typeof decoded.role !== "string"
   ) {
     throw new Error("Token invalide");
@@ -56,7 +56,7 @@ export function verifyRefreshToken(token: string): TokenPayload {
 
   if (
     typeof decoded === "string" ||
-    typeof decoded.userId !== "number" ||
+    typeof decoded.userId !== "string" ||
     typeof decoded.role !== "string"
   ) {
     throw new Error("Refresh token invalide");
