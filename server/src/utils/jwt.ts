@@ -67,3 +67,11 @@ export function verifyRefreshToken(token: string): TokenPayload {
     role: decoded.role,
   };
 }
+
+export function getRefreshTokenExpiration() {
+  const expiresAt = new Date();
+  
+  expiresAt.setDate(expiresAt.getDate() + 7);
+  
+  return expiresAt;
+}
