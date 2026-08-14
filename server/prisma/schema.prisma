@@ -16,40 +16,71 @@ model User {
     id String @id @default(cuid())
     username String @unique
     email String @unique
-    motdepasse String?
+    motdepasse String
     role Role @default(VISITEUR)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
+    journalEntries JournalEntry[]
+    favorite Favorite[]
+    reports Report[]
 }
 
 model JournalEntry {
     id String @id @default(cuid())
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+    date DateTime @db.Date
     humeur Int 
     energie Int
     qualite_sommeil Int
     anxiete_stress Int
+    evenements String
+    gratitude String?
 
+    userId String
+    user User @relation(fields: [userId], references: [id], onDelete:Cascade)
+    activities JournalActivity[]
+
+    @@unique([userId, date])
 }
 
 model Activity {
     id String @id @default(cuid())
+    nom String @unique
+    createdAt DateTime @default(now())
+
+    journalActivities JournalActivity[]
 
 }
 
 model JournalActivity {
-    id String @id @default(cuid())
+    journalEntryId String
+    journalEntry JournalEntry @relation(fields: [journalEntryId], references: [id], onDelete: Cascade)
+    activityId String
+    activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+    createdAt DateTime @default(now())
+
+    @@id([journalEntryId, activityId])
+    
 
 }
 
 model Resource {
-    id Int @id @default(autoincrement())
+    id String @id @default(cuid())
     type TypeResource
 
+    favorites Favorite[]
 }
 
-model Favorite {
-    id String @id @default(cuid())
+model Favorite { // relation N-N entre utilisateur et ressource
+    userId String
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+    resourceId String
+    resource Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+    createdAt DateTime @default(now())
+
+    @@id([userId, resourceId])
 
 }
 
@@ -90,7 +121,8 @@ model Message {
 
 model Report {
     id String @id @default(cuid())
-    emetteur User 
+    emetteurId String
+    emetteur User @relation(fields: [emetteurId], references: [id], onDelete: Cascade)
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
     contenu String
