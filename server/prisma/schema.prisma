@@ -93,16 +93,21 @@ model Group {
     id String @id @default(cuid())
     nom String
     description String
-    memberCount Int
+
     posts Post[]
+    groupMembers GroupMember[]
+
 
 }
 
 model GroupMember {
-    id String @id @default(cuid())
     userId String
     user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+    groupId String
+    group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
     statutDemande StatutDemande?
+
+    @@id([userId, groupId])
 
 }
 
