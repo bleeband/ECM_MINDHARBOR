@@ -15,7 +15,6 @@ const registerBodySchema = z.object({
     .max(50, "Le pseudonyme est trop long"),
 });
 
-
 export const registerSchema = z.object({
   body: registerBodySchema,
   params: z.object({}),
@@ -33,5 +32,22 @@ export const loginSchema = z.object({
   query: z.object({}),
 });
 
+const refreshTokenBodySchema = z.object({
+  refreshToken: z.string().min(1, "Le refresh token est requis"),
+});
+
+export const refreshSchema = z.object({
+  body: refreshTokenBodySchema,
+  params: z.object({}),
+  query: z.object({}),
+});
+
+export const logoutSchema = z.object({
+  body: refreshTokenBodySchema,
+  params: z.object({}),
+  query: z.object({}),
+});
+
 export type RegisterInput = z.infer<typeof registerBodySchema>;
 export type LoginInput = z.infer<typeof loginBodySchema>;
+export type RefreshInput = z.infer<typeof refreshTokenBodySchema>;
