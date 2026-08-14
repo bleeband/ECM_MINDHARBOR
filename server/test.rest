@@ -17,3 +17,19 @@ Content-Type: application/json
   "password": "qwerty",
   "pseudonyme": "Charles"
 }
+
+### Refresh invalide (body vide)
+POST http://localhost:3000/api/v1/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": ""
+}
+
+### Refresh (validation Zod)
+POST http://localhost:3000/api/v1/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "test"
+}
