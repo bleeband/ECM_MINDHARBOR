@@ -24,6 +24,7 @@ model User {
     journalEntries JournalEntry[]
     favorite Favorite[]
     reports Report[]
+    groupMemberships GroupMember[]
 }
 
 model JournalEntry {
@@ -54,7 +55,7 @@ model Activity {
 
 }
 
-model JournalActivity {
+model JournalActivity { // relation N-N entre JournalEntry et Activity
     journalEntryId String
     journalEntry JournalEntry @relation(fields: [journalEntryId], references: [id], onDelete: Cascade)
     activityId String
@@ -69,7 +70,11 @@ model JournalActivity {
 model Resource {
     id String @id @default(cuid())
     type TypeResource
-
+    titre String
+    url String?
+    contenu String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
     favorites Favorite[]
 }
 
@@ -86,16 +91,25 @@ model Favorite { // relation N-N entre utilisateur et ressource
 
 model Group {
     id String @id @default(cuid())
+    nom String
+    description String
+    memberCount Int
+    posts Post[]
 
 }
 
 model GroupMember {
     id String @id @default(cuid())
+    userId String
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+    statutDemande StatutDemande?
 
 }
 
 model Post {
     id String @id @default(cuid())
+    groupeId String
+    group Group @relation(fields: [groupeId], references: [id], onDelete: Cascade)
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
     titre String
@@ -108,7 +122,7 @@ model Comment {
     id String @id @default(cuid())
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
-    body String
+    contenu String
 }
 
 model Message {
@@ -154,4 +168,10 @@ enum Role {
 enum Visibilite {
     PUBLIQUE
     PRIVE
+}
+
+enum StatutDemande {
+    EN_ATTENTE
+    ACCEPTEE
+    REJETEE
 }
