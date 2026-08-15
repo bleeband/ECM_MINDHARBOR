@@ -1,15 +1,12 @@
-// src/context/AuthContext.tsx
-
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-
-type Role = "USER" | "ADMIN";
-
-type AuthUser = {
-  id: string;
-  email: string;
-  displayName: string;
-  role: Role;
-};
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
+import { me } from "../api/auth";
+import type { AuthUser } from "../types/types";
 
 type AuthContextType = {
   user: AuthUser | null;
@@ -21,39 +18,40 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  // const [user, setUser] = useState<AuthUser | null>(null);
-  const [user, setUser] = useState<AuthUser | null>({
-    id: "dev-1",
-    email: "admin@mindharbor.ca",
-    displayName: "Admin Dev",
-    role: "ADMIN",
-  });
-
-  // temporaire pour simuler le chargement de l'utilisateur
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
   useEffect(() => {
-    setIsLoading(false);
+    let cancelled = false;
+
+    async function restoreSession() {
+      if (!localStorage.getItem("accessToken")) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const currentUser = await me();
+
+        if (!cancelled) {
+          setUser(currentUser);
+        }
+      } catch {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    void restoreSession();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
-
-  //// A remettre quand les endpoints seront disponibles
-  // useEffect(() => {
-  //   async function loadUser() {
-  //     try {
-  //       /*
-  //        * Plus tard :
-  //        *
-  //        * const currentUser = await getMe();
-  //        * setUser(currentUser);
-  //        */
-
-  //       setUser(null);
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   }
-
-  //   void loadUser();
-  // }, []);
 
   function logout() {
     localStorage.removeItem("accessToken");
@@ -68,7 +66,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoading,
         setUser,
         logout,
-      }}>
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
