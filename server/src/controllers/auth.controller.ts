@@ -6,9 +6,11 @@ import type {
   RegisterInput,
 } from "../schemas/auth.schema.js";
 import { createAccessToken, verifyRefreshToken } from "../utils/jwt.js";
+import prisma from "../utils/prisma.js";
 import {
   connecterUtilisateur,
   inscrireUtilisateur,
+  supprimerRefreshToken,
   trouverRefreshToken,
 } from "../services/auth.service.js";
 
@@ -19,10 +21,7 @@ export async function register(
 ) {
   try {
     const utilisateur = await inscrireUtilisateur(req.body as RegisterInput);
-
-    res.status(201).json({
-      user: utilisateur,
-    });
+    res.status(201).json({ user: utilisateur });
   } catch (error) {
     next(error);
   }
@@ -31,19 +30,20 @@ export async function register(
 export async function login(req: Request, res: Response, next: NextFunction) {
   try {
     const resultat = await connecterUtilisateur(req.body as LoginInput);
-
     res.status(200).json(resultat);
   } catch (error) {
     next(error);
   }
 }
 
-export async function refresh(req: Request, res: Response, next: NextFunction) {
+export async function refresh(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   try {
     const { refreshToken } = req.body as RefreshInput;
-
     const payload = verifyRefreshToken(refreshToken);
-
     const tokenEnregistre = await trouverRefreshToken(refreshToken);
 
     if (!tokenEnregistre) {
@@ -59,9 +59,7 @@ export async function refresh(req: Request, res: Response, next: NextFunction) {
       role: payload.role,
     });
 
-    res.status(200).json({
-      accessToken,
-    });
+    res.status(200).json({ accessToken });
   } catch (error) {
     if (error instanceof AppError) {
       return next(error);
@@ -77,14 +75,38 @@ export async function refresh(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-export function logout(req: Request, res: Response) {
-  res.status(200).json({
-    message: "Données de logout valides",
-  });
+export async function logout(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const { refreshToken } = req.body as RefreshInput;
+    await supprimerRefreshToken(refreshToken);
+    res.status(204).send();
+  } catch (error) {
+    next(error);
+  }
 }
 
-export function me(req: Request, res: Response) {
-  res.status(200).json({
-    user: req.user,
-  });
+export async function me(req: Request, res: Response, next: NextFunction) {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user!.userId },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        role: true,
+      },
+    });
+
+    if (!user) {
+      throw new AppError(401, "UNAUTHENTICATED", "Utilisateur introuvable.");
+    }
+
+    res.status(200).json({ user });
+  } catch (error) {
+    next(error);
+  }
 }
