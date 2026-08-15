@@ -25,6 +25,8 @@ model User {
     favorite Favorite[]
     reports Report[]
     refreshTokens RefreshToken[]
+    groupMembers GroupMember[]
+
 }
 
 model JournalEntry {
