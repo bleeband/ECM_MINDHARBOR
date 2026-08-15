@@ -179,7 +179,6 @@ model Report {
     updatedAt DateTime @updatedAt
     contenu String
 
-
 }
 
 model RefreshToken {
@@ -192,7 +191,6 @@ model RefreshToken {
     user User @relation(fields: [userId], references: [id], onDelete: Cascade)
     // recherche plus rapide pour trouver les sessions de lutilisateur
     @@index([userId])
-
 }
 
 // -----ENUMS-----

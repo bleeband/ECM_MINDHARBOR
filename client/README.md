@@ -1,75 +1,79 @@
-# React + TypeScript + Vite
+# MindHarbor — Client
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Interface React + TypeScript du projet MindHarbor.
 
-Currently, two official plugins are available:
+## Pré-requis
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Node.js 20+
+- npm
+- Le backend démarré sur `http://localhost:3000/api/v1` par défaut
 
-## React Compiler
+## Installation
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+cd client
+npm install
+cp .env.example .env
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Variables d’environnement
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- `VITE_API_URL` : URL de base de l’API Express.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Exemple :
 
+```env
+VITE_API_URL=http://localhost:3000/api/v1
 ```
+
+## Scripts
+
+```bash
+npm run dev
+npm run build
+npm run preview
+npm run typecheck
+```
+
+## Fonctionnalités couvertes
+
+- Connexion et inscription.
+- Tableau de bord personnel.
+- Journal quotidien avec historique.
+- Tendances avec graphique.
+- Ressources avec recherche et favoris.
+- Groupes de soutien.
+- Messagerie privée.
+- Profil.
+- Administration de base.
+
+## Organisation
+
+- `src/api/` : toutes les requêtes Axios.
+- `src/context/` : contexte d’authentification.
+- `src/components/` : composants réutilisables.
+- `src/pages/` : pages de l’application.
+- `src/types.ts` : types partagés côté client.
+
+## Choix techniques
+
+- `Axios` est centralisé dans `src/api/axios.ts`.
+- Le token d’accès est injecté automatiquement par intercepteur.
+- Une réponse `401` tente un refresh automatique.
+- Les routes privées sont protégées avec `ProtectedRoute` et `AdminRoute`.
+- L’interface est responsive et pensée pour une largeur mobile de 375px.
+
+## Notes d’intégration
+
+Le client suppose que le backend expose les routes prévues dans l’énoncé, sous le préfixe `/api/v1`.
+
+## Comptes de démonstration
+
+À compléter avec les comptes seedés du backend.
+
+## Points à vérifier avant remise
+
+- `npm run typecheck` passe sans erreur.
+- `VITE_API_URL` est bien défini.
+- Aucun appel `fetch` n’est utilisé.
+- Aucune URL API n’est écrite en dur dans les composants.

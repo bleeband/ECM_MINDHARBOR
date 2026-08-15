@@ -1,8 +1,6 @@
 import { Link } from "react-router-dom";
 import { Heart, BookOpen, Users, ShieldCheck } from "lucide-react";
 
-
-
 export default function HomePage() {
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
@@ -136,7 +134,7 @@ export default function HomePage() {
               disponibles.
             </p>
 
-            <Link to="/emergency" className="mt-4 inline-block rounded-lg bg-rose-700 px-5 py-3 font-semibold text-white hover:bg-rose-800">
+            <Link to="/urgence" className="mt-4 inline-block rounded-lg bg-rose-700 px-5 py-3 font-semibold text-white hover:bg-rose-800">
               Voir les ressources d'urgence
             </Link>
           </div>

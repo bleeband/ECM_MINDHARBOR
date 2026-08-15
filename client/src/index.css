@@ -1,19 +1,88 @@
 @import "tailwindcss";
 
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
+:root {
+  /* Palette Coolors (#cad2c5, #84a98c, #52796f, #354f52, #2f3e46) */
+  --color-sage-100: #cad2c5;
+  --color-sage-200: #84a98c;
+  --color-sage-300: #52796f;
+  --color-sage-400: #354f52;
+  --color-sage-500: #2f3e46;
+
+  /* Typographie */
+  --heading: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* Variables consommées par ton CSS (Mode Clair) */
+  --bg: #f7f9f7;
+  --border: var(--color-sage-100);
+  --text: var(--color-sage-400);
+  --text-h: var(--color-sage-500);
+  --code-bg: rgba(202, 210, 197, 0.45); /* #cad2c5 adouci */
+  --accent: var(--color-sage-200);
+  --accent-bg: var(--color-sage-100);
+  --accent-border: var(--color-sage-300);
+  --accent-hover: var(--color-sage-300);
+  --surface: #ffffff;
+  --surface-subtle: #f1f5f2;
+  --muted: #64748b;
+  --danger-bg: #fff1f2;
+  --danger-border: #fecdd3;
+  --danger-text: #9f1239;
+  --danger-accent: #be123c;
+}
+
+/* Thème sombre automatique si l'OS est en dark mode */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: var(--color-sage-500);
+    --border: var(--color-sage-400);
+    --text: var(--color-sage-100);
+    --text-h: #f1f5f2;
+    --code-bg: var(--color-sage-400);
+    --accent: var(--color-sage-200);
+    --accent-bg: var(--color-sage-400);
+    --accent-border: var(--color-sage-200);
+    --accent-hover: var(--color-sage-100);
+    --surface: var(--color-sage-400);
+    --surface-subtle: var(--color-sage-500);
+    --muted: var(--color-sage-100);
+    --danger-bg: #4c2630;
+    --danger-border: #9f5968;
+    --danger-text: #fecdd3;
+    --danger-accent: #fda4af;
+  }
+}
+
+@theme inline {
+  --color-slate-50: var(--bg);
+  --color-slate-100: var(--border);
+  --color-slate-200: var(--border);
+  --color-slate-300: var(--border);
+  --color-slate-400: var(--muted);
+  --color-slate-500: var(--muted);
+  --color-slate-600: var(--text);
+  --color-slate-700: var(--text);
+  --color-slate-900: var(--text-h);
+  --color-sky-50: var(--accent-bg);
+  --color-sky-100: var(--accent-bg);
+  --color-sky-200: var(--accent-border);
+  --color-sky-600: var(--accent);
+  --color-sky-700: var(--accent);
+  --color-sky-800: var(--accent-hover);
+  --color-sky-900: var(--text-h);
+  --color-rose-50: var(--danger-bg);
+  --color-rose-200: var(--danger-border);
+  --color-rose-300: var(--danger-border);
+  --color-rose-700: var(--danger-accent);
+  --color-rose-800: var(--danger-accent);
+  --color-rose-900: var(--danger-text);
+  --color-white: var(--surface);
 }
 
 body {
   margin: 0;
+  background-color: var(--bg);
+  color: var(--text);
 }
 
 h1,
