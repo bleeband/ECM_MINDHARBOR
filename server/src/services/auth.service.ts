@@ -2,6 +2,13 @@ import prisma from "../utils/prisma.js";
 import { AppError } from "../middlewares/error.js";
 import type { RegisterInput } from "../schemas/auth.schema.js";
 import { hashPassword } from "../utils/password.js";
+import type { LoginInput } from "../schemas/auth.schema.js";
+import { comparePassword } from "../utils/password.js";
+import {
+  createAccessToken,
+  createRefreshToken,
+  getRefreshTokenExpiration,
+} from "../utils/jwt.js";
 
 export async function inscrireUtilisateur(data: RegisterInput) {
   const utilisateurExistant = await prisma.user.findFirst({
@@ -36,6 +43,60 @@ export async function inscrireUtilisateur(data: RegisterInput) {
   });
 }
 
+export async function connecterUtilisateur(data: LoginInput) {
+  const utilisateur = await prisma.user.findUnique({
+    where: {
+      email: data.email,
+    },
+  });
+
+  if (!utilisateur) {
+    throw new AppError(
+      401,
+      "INVALID_CREDENTIALS",
+      "Courriel ou mot de passe invalide.",
+    );
+  }
+
+  const motdepasseValide = await comparePassword(
+    data.password,
+    utilisateur.motdepasse,
+  );
+
+  if (!motdepasseValide) {
+    throw new AppError(
+      401,
+      "INVALID_CREDENTIALS",
+      "Courriel ou mot de passe invalide.",
+    );
+  }
+
+  const payload = {
+    userId: utilisateur.id,
+    role: utilisateur.role,
+  };
+
+  const accessToken = createAccessToken(payload);
+  const refreshToken = createRefreshToken(payload);
+
+  await sauvegarderRefreshToken(
+    utilisateur.id,
+    refreshToken,
+    getRefreshTokenExpiration(),
+  );
+
+  return {
+    user: {
+      id: utilisateur.id,
+      username: utilisateur.username,
+      email: utilisateur.email,
+      role: utilisateur.role,
+    },
+    accessToken,
+    refreshToken,
+  };
+}
+
 // sauvegarder l'expiration du token pour le gerer facilement sans dependre du JWT
 export function sauvegarderRefreshToken(
   userId: string,
@@ -55,6 +116,14 @@ export function sauvegarderRefreshToken(
 // supprimer le token de la BD
 export function supprimerRefreshToken(token: string) {
   return prisma.refreshToken.deleteMany({
+    where: {
+      token,
+    },
+  });
+}
+// trouver le token dans la BD
+export function trouverRefreshToken(token: string) {
+  return prisma.refreshToken.findUnique({
     where: {
       token,
     },
