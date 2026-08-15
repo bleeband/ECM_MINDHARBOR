@@ -123,7 +123,7 @@ model Post {
     authorId String
     author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
     groupeId String
-    group Group @relation(fields: [groupeId], references: [id], onDelete: Cascade)
+    groupe Group @relation(fields: [groupeId], references: [id], onDelete: Cascade)
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
     titre String
@@ -132,6 +132,8 @@ model Post {
 
     comments Comment[]
     signalements Report[]
+
+    @@index([groupeId])
 
 }
 
@@ -146,6 +148,8 @@ model Comment {
     contenu String
 
     signalements Report[]
+
+    @@index([postId])
 }
 
 model Message {
