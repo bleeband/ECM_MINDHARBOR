@@ -221,7 +221,7 @@ export default function RegisterPage() {
         </p>
 
         <div className="mt-3 text-center">
-          <Link to="/emergency" className="text-sm font-semibold text-rose-700 hover:text-rose-900">
+          <Link to="/urgence" className="text-sm font-semibold text-rose-700 hover:text-rose-900">
             Besoin d'aide maintenant?
           </Link>
         </div>
