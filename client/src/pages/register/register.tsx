@@ -1,96 +1,69 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { UserPlus } from "lucide-react";
+import { register } from "../../api/auth";
 
 type RegisterForm = {
   email: string;
-  displayName: string;
+  pseudonyme: string;
   password: string;
   confirmPassword: string;
 };
 
 export default function RegisterPage() {
   const navigate = useNavigate();
-
   const [form, setForm] = useState<RegisterForm>({
     email: "",
-    displayName: "",
+    pseudonyme: "",
     password: "",
     confirmPassword: "",
   });
-
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
     const { name, value } = event.target;
-
-    setForm((current) => ({
-      ...current,
-      [name]: value,
-    }));
+    setForm((current) => ({ ...current, [name]: value }));
   }
 
   function validateForm(): string | null {
-    if (!form.email.trim() || !form.displayName.trim() || !form.password || !form.confirmPassword) {
+    if (
+      !form.email.trim() ||
+      !form.pseudonyme.trim() ||
+      !form.password ||
+      !form.confirmPassword
+    ) {
       return "Veuillez remplir tous les champs.";
     }
-
-    if (form.displayName.trim().length < 2) {
+    if (form.pseudonyme.trim().length < 2) {
       return "Le pseudonyme doit contenir au moins 2 caractères.";
     }
-
-    if (form.password.length < 8) {
-      return "Le mot de passe doit contenir au moins 8 caractères.";
+    if (form.password.length < 8 || !/[A-Z]/.test(form.password) || !/[0-9]/.test(form.password)) {
+      return "Le mot de passe doit contenir 8 caractères, une majuscule et un chiffre.";
     }
-
-    if (!/[A-Z]/.test(form.password)) {
-      return "Le mot de passe doit contenir au moins une majuscule.";
-    }
-
-    if (!/[0-9]/.test(form.password)) {
-      return "Le mot de passe doit contenir au moins un chiffre.";
-    }
-
     if (form.password !== form.confirmPassword) {
       return "Les mots de passe ne correspondent pas.";
     }
-
     return null;
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
     setError("");
 
     const validationError = validateForm();
-
     if (validationError) {
       setError(validationError);
       return;
     }
 
-    setIsLoading(true);
-
     try {
-      /*
-       * TEMPORAIRE
-       *
-       * À remplacer ensuite par :
-       *
-       * await register({
-       *   email: form.email,
-       *   displayName: form.displayName,
-       *   password: form.password,
-       * });
-       */
-
-      console.log("Inscription :", {
-        email: form.email,
-        displayName: form.displayName,
+      setIsLoading(true);
+      await register({
+        email: form.email.trim(),
+        pseudonyme: form.pseudonyme.trim(),
+        password: form.password,
       });
-
       navigate("/login");
     } catch {
       setError("La création du compte n'a pas fonctionné. Veuillez réessayer.");
@@ -107,124 +80,79 @@ export default function RegisterPage() {
             <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-100">MH</span>
             MindHarbor
           </Link>
-
           <h1 className="mt-8 text-3xl font-bold tracking-tight text-slate-900">Créer votre espace</h1>
-
-          <p className="mt-2 text-slate-600">Commencez votre parcours à votre rythme.</p>
         </div>
 
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
           <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label htmlFor="displayName" className="mb-2 block text-sm font-medium text-slate-700">
-                Pseudonyme
-              </label>
-
+            <label className="block">
+              <span className="mb-2 block text-sm font-medium text-slate-700">Pseudonyme</span>
               <input
-                id="displayName"
-                name="displayName"
-                type="text"
+                name="pseudonyme"
                 autoComplete="nickname"
-                value={form.displayName}
+                value={form.pseudonyme}
                 onChange={handleChange}
-                placeholder="Ex. Tom_mtl"
                 disabled={isLoading}
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition placeholder:text-slate-400 focus:border-sky-600 focus:ring-2 focus:ring-sky-100 disabled:bg-slate-100"
+                className="w-full rounded-xl border border-slate-300 px-4 py-3"
               />
+            </label>
 
-              <p className="mt-2 text-xs text-slate-500">Le pseudonyme pourra être utilisé à la place de votre nom réel.</p>
-            </div>
-
-            <div>
-              <label htmlFor="email" className="mb-2 block text-sm font-medium text-slate-700">
-                Courriel
-              </label>
-
+            <label className="block">
+              <span className="mb-2 block text-sm font-medium text-slate-700">Courriel</span>
               <input
-                id="email"
                 name="email"
                 type="email"
                 autoComplete="email"
                 value={form.email}
                 onChange={handleChange}
-                placeholder="vous@exemple.com"
                 disabled={isLoading}
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition placeholder:text-slate-400 focus:border-sky-600 focus:ring-2 focus:ring-sky-100 disabled:bg-slate-100"
+                className="w-full rounded-xl border border-slate-300 px-4 py-3"
               />
-            </div>
+            </label>
 
-            <div>
-              <label htmlFor="password" className="mb-2 block text-sm font-medium text-slate-700">
-                Mot de passe
-              </label>
-
+            <label className="block">
+              <span className="mb-2 block text-sm font-medium text-slate-700">Mot de passe</span>
               <input
-                id="password"
                 name="password"
                 type="password"
                 autoComplete="new-password"
                 value={form.password}
                 onChange={handleChange}
-                placeholder="Minimum 8 caractères"
                 disabled={isLoading}
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition placeholder:text-slate-400 focus:border-sky-600 focus:ring-2 focus:ring-sky-100 disabled:bg-slate-100"
+                className="w-full rounded-xl border border-slate-300 px-4 py-3"
               />
+            </label>
 
-              <p className="mt-2 text-xs text-slate-500">Minimum 8 caractères, une majuscule et un chiffre.</p>
-            </div>
-
-            <div>
-              <label htmlFor="confirmPassword" className="mb-2 block text-sm font-medium text-slate-700">
-                Confirmer le mot de passe
-              </label>
-
+            <label className="block">
+              <span className="mb-2 block text-sm font-medium text-slate-700">Confirmer le mot de passe</span>
               <input
-                id="confirmPassword"
                 name="confirmPassword"
                 type="password"
                 autoComplete="new-password"
                 value={form.confirmPassword}
                 onChange={handleChange}
-                placeholder="Répétez votre mot de passe"
                 disabled={isLoading}
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition placeholder:text-slate-400 focus:border-sky-600 focus:ring-2 focus:ring-sky-100 disabled:bg-slate-100"
+                className="w-full rounded-xl border border-slate-300 px-4 py-3"
               />
-            </div>
+            </label>
 
-            {error && (
-              <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
-                {error}
-              </div>
-            )}
+            {error && <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">{error}</div>}
 
             <button
               type="submit"
               disabled={isLoading}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-sky-700 px-5 py-3 font-semibold text-white transition hover:bg-sky-800 disabled:cursor-not-allowed disabled:opacity-60">
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-sky-700 px-5 py-3 font-semibold text-white disabled:opacity-60"
+            >
               <UserPlus className="h-5 w-5" />
-
               {isLoading ? "Création du compte..." : "Créer mon compte"}
             </button>
           </form>
 
           <div className="mt-6 border-t border-slate-200 pt-6 text-center text-sm text-slate-600">
             Vous avez déjà un compte?{" "}
-            <Link to="/login" className="font-semibold text-sky-700 hover:text-sky-900">
-              Se connecter
-            </Link>
+            <Link to="/login" className="font-semibold text-sky-700">Se connecter</Link>
           </div>
         </section>
-
-        <p className="mt-6 text-center text-xs leading-5 text-slate-500">
-          Vos données personnelles sont traitées avec confidentialité. Vous pourrez modifier vos paramètres de visibilité après votre
-          inscription.
-        </p>
-
-        <div className="mt-3 text-center">
-          <Link to="/urgence" className="text-sm font-semibold text-rose-700 hover:text-rose-900">
-            Besoin d'aide maintenant?
-          </Link>
-        </div>
       </div>
     </main>
   );

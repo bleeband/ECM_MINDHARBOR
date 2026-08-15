@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 import ProtectedRoute from "./routes/ProtectedRoute";
 import AdminRoute from "./routes/AdminRoute";
+import { Layout } from "./components/Layout";
 
 import Acceuil from "./pages/accueil";
 import Login from "./pages/login/login";
@@ -13,14 +14,15 @@ import Groupe from "./pages/groupe/groupe";
 import DetailGroupe from "./pages/groupe/detail";
 import Resources from "./pages/resource/resources";
 import Urgence from "./pages/resource/urgence";
+import Journal from "./pages/journal/journal";
+import Analyse from "./pages/analyse/analyse";
 //import Messagerie from "./pages/messagerie/messagerie";
-//import Journal from "./pages/journal/journal";
-//import Analyse from "./pages/analyse/analyse";
 
 export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
+      <Layout>
+        <Routes>
         {/* Public */}
         <Route path="/" element={<Acceuil />} />
         <Route path="/login" element={<Login />} />
@@ -34,13 +36,16 @@ export default function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/groupe" element={<Groupe />} />
           <Route path="/groupe/:id" element={<DetailGroupe />} />
+          <Route path="/journal" element={<Journal />} />
+          <Route path="/analyse" element={<Analyse />} />
         </Route>
 
         {/* Admin seulement */}
         <Route element={<AdminRoute />}>
           <Route path="/admin" element={<Admin />} />
         </Route>
-      </Routes>
+        </Routes>
+      </Layout>
     </BrowserRouter>
   );
 }
