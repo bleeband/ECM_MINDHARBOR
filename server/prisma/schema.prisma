@@ -100,6 +100,7 @@ model Group {
     id String @id @default(cuid())
     nom String
     description String
+    createdAt DateTime @default(now())
 
     posts Post[]
     groupMembers GroupMember[]
@@ -123,15 +124,17 @@ model Post {
     authorId String
     author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
     groupeId String
-    group Group @relation(fields: [groupeId], references: [id], onDelete: Cascade)
+    groupe Group @relation(fields: [groupeId], references: [id], onDelete: Cascade)
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
     titre String
     contenu String
-    visibilite Visibilite @default(PRIVE)
+    visibilite Visibilite @default(PUBLIQUE)
 
     comments Comment[]
     signalements Report[]
+
+    @@index([groupeId])
 
 }
 
@@ -146,6 +149,8 @@ model Comment {
     contenu String
 
     signalements Report[]
+
+    @@index([postId])
 }
 
 model Message {
