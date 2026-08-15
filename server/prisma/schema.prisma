@@ -23,9 +23,14 @@ model User {
 
     journalEntries JournalEntry[]
     favorite Favorite[]
-    reports Report[]
     refreshTokens RefreshToken[]
     groupMembers GroupMember[]
+    comments Comment[]
+    posts Post[]
+    messagesEnvoyes Message[] @relation("MessagesEnvoyes")
+    messagesRecus Message[] @relation("MessagesRecus")
+    signalementsEmis Report[] @relation("SignalementsEmis")
+    signalementsRecus Report[] @relation("SignalementsRecus")
 
 }
 
@@ -115,6 +120,8 @@ model GroupMember {
 
 model Post {
     id String @id @default(cuid())
+    authorId String
+    author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
     groupeId String
     group Group @relation(fields: [groupeId], references: [id], onDelete: Cascade)
     createdAt DateTime @default(now())
@@ -123,17 +130,30 @@ model Post {
     contenu String
     visibilite Visibilite @default(PRIVE)
 
+    comments Comment[]
+    signalements Report[]
+
 }
 
 model Comment {
     id String @id @default(cuid())
+    authorId String
+    author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+    postId String
+    post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
     contenu String
+
+    signalements Report[]
 }
 
 model Message {
     id String @id @default(cuid())
+    senderId String
+    sender User @relation("MessagesEnvoyes", fields: [senderId], references: [id], onDelete: Cascade)
+    recipientId String
+    recipient User @relation("MessagesRecus", fields: [recipientId], references: [id], onDelete: Cascade)
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
     titre String
@@ -143,7 +163,13 @@ model Message {
 model Report {
     id String @id @default(cuid())
     emetteurId String
-    emetteur User @relation(fields: [emetteurId], references: [id], onDelete: Cascade)
+    emetteur User @relation("SignalementsEmis", fields: [emetteurId], references: [id], onDelete: Cascade)
+    reportedUserId String?
+    reported User? @relation("SignalementsRecus", fields: [reportedUserId], references: [id], onDelete: Cascade)
+    postId String?
+    post Post? @relation(fields: [postId], references: [id], onDelete: Cascade)
+    commentId String?
+    comment Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
     contenu String
