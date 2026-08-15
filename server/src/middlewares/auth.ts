@@ -26,6 +26,29 @@ export const requireAuth: RequestHandler = (req, _res, next) => {
   }
 };
 
+export const optionalAuth: RequestHandler = (req, _res, next) => {
+  const header = req.headers.authorization;
+
+  if (!header) {
+    next();
+    return;
+  }
+
+  const [type, token] = header.split(" ");
+
+  if (type !== "Bearer" || !token) {
+    next(new AppError(401, "INVALID_TOKEN", "Format du token invalide."));
+    return;
+  }
+
+  try {
+    req.user = verifyAccessToken(token);
+    next();
+  } catch {
+    next(new AppError(401, "INVALID_TOKEN", "Token invalide ou expiré."));
+  }
+};
+
 // accepte 1 ou plusieurs roles en parametre
 export function requireRole(...roles: string[]): RequestHandler {
   return (req, _res, next) => {
