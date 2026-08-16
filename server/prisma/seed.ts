@@ -1,26 +1,49 @@
 import "dotenv/config";
 
-import { PrismaClient } from "../generated/prisma/client.js";
 import { PrismaNeon } from "@prisma/adapter-neon";
+import { PrismaClient } from "../generated/prisma/client.js";
+import { hashPassword } from "../src/utils/password.js";
 
 const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
-await prisma.journalActivity.deleteMany();
-await prisma.journalEntry.deleteMany();
-await prisma.activity.deleteMany();
+const demoUsers = [
+  {
+    email: "admin@ecmmind.com",
+    username: "admin",
+    password: "AdminTest-2026!",
+    role: "ADMINISTRATEUR" as const,
+  },
+  {
+    email: "moderateur@ecmmind.com",
+    username: "moderateur",
+    password: "ModTest-2026!",
+    role: "MODERATEUR" as const,
+  },
+  {
+    email: "user1@test.com",
+    username: "user1",
+    password: "User1Test-2026!",
+    role: "UTILISATEUR" as const,
+  },
+  {
+    email: "user2@test.com",
+    username: "user2",
+    password: "User2Test-2026!",
+    role: "UTILISATEUR" as const,
+  },
+];
 
-// fonction pour obtenir un chiffre aléatoire entre 1 et 5 inclusif:
+const activityNames = [
+  "exercice",
+  "travail",
+  "méditation",
+  "loisirs",
+  "thérapie",
+  "marche",
+];
 
-function getRandomInt(min: number, max: number): number {
-  const minValue = Math.ceil(min);
-  const maxValue = Math.floor(max);
-  return Math.floor(Math.random() * (maxValue - minValue + 1) + minValue);
-}
-
-// liste d'évenements pour remplir le field evenements avec un evenement aléatoire:
-
-const evenementsListe = [
+const events = [
   "Allé à l'épicerie",
   "Allé au gym",
   "Téléphoné à ma grand-mère",
@@ -30,44 +53,94 @@ const evenementsListe = [
   "Marché au parc",
 ];
 
-// ajout des activités
+const dailyScores = [
+  [4, 3, 4, 2],
+  [3, 4, 3, 3],
+  [5, 4, 4, 1],
+  [3, 2, 3, 4],
+  [4, 4, 5, 2],
+] as const;
 
-await prisma.activity.createMany({
-  data: [
-    { nom: "exercice" },
-    { nom: "travail" },
-    { nom: "méditation" },
-    { nom: "loisirs" },
-    { nom: "thérapie" },
-    { nom: "marche" },
-  ],
-});
+function todayInQuebec() {
+  const date = new Intl.DateTimeFormat("fr-CA", {
+    timeZone: "America/Toronto",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
 
-const activities = await prisma.activity.findMany();
-
-// loop pour créer 90 journal entries avec valeurs aléatoires et dates adjacentes:
-
-for (let i: number = 0; i < 90; i += 1) {
-  const d = new Date();
-  d.setDate(d.getDate() - i);
-  await prisma.journalEntry.create({
-    data: {
-      date: d,
-      humeur: getRandomInt(1, 5),
-      energie: getRandomInt(1, 5),
-      qualite_sommeil: getRandomInt(1, 5),
-      anxiete_stress: getRandomInt(1, 5),
-      evenements: evenementsListe[getRandomInt(0, evenementsListe.length - 1)]!,
-      userId: "cmsttqsje0000i4vuahfp43bh",
-      activities: {
-        create: [
-          { activityId: activities[getRandomInt(0, activities.length - 1)]!.id },
-        ],
-      },
-    },
-  });
+  return new Date(`${date}T00:00:00.000Z`);
 }
 
-// afficher les journal entries crééés:
+try {
+  const seededUsers = await Promise.all(
+    demoUsers.map(async (user) => {
+      const motdepasse = await hashPassword(user.password);
 
-// console.log(await prisma.journalEntry.findMany());
+      return prisma.user.upsert({
+        where: { email: user.email },
+        update: {
+          username: user.username,
+          motdepasse,
+          role: user.role,
+        },
+        create: {
+          email: user.email,
+          username: user.username,
+          motdepasse,
+          role: user.role,
+        },
+      });
+    }),
+  );
+
+  const user1 = seededUsers.find((user) => user.email === "user1@test.com");
+
+  if (!user1) {
+    throw new Error("Le compte de démonstration user1 est introuvable.");
+  }
+
+  const activities = await Promise.all(
+    activityNames.map((nom) =>
+      prisma.activity.upsert({
+        where: { nom },
+        update: {},
+        create: { nom },
+      }),
+    ),
+  );
+
+  // Le seed ne réinitialise que les entrées de démonstration de user1.
+  await prisma.journalEntry.deleteMany({ where: { userId: user1.id } });
+
+  const today = todayInQuebec();
+
+  for (let index = 0; index < 30; index += 1) {
+    const date = new Date(today);
+    date.setUTCDate(date.getUTCDate() - index);
+
+    const [humeur, energie, qualite_sommeil, anxiete_stress] =
+      dailyScores[index % dailyScores.length]!;
+
+    await prisma.journalEntry.create({
+      data: {
+        userId: user1.id,
+        date,
+        humeur,
+        energie,
+        qualite_sommeil,
+        anxiete_stress,
+        evenements: events[index % events.length]!,
+        activities: {
+          create: {
+            activityId: activities[index % activities.length]!.id,
+          },
+        },
+      },
+    });
+  }
+
+  console.log("Seed de démonstration complété: 4 utilisateurs et 30 entrées pour user1.");
+} finally {
+  await prisma.$disconnect();
+}

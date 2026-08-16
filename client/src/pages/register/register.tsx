@@ -27,12 +27,7 @@ export default function RegisterPage() {
   }
 
   function validateForm(): string | null {
-    if (
-      !form.email.trim() ||
-      !form.pseudonyme.trim() ||
-      !form.password ||
-      !form.confirmPassword
-    ) {
+    if (!form.email.trim() || !form.pseudonyme.trim() || !form.password || !form.confirmPassword) {
       return "Veuillez remplir tous les champs.";
     }
     if (form.pseudonyme.trim().length < 2) {
@@ -77,7 +72,7 @@ export default function RegisterPage() {
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
           <Link to="/" className="inline-flex items-center gap-2 text-2xl font-bold text-sky-800">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-100">MH</span>
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-100">ECM</span>
             MindHarbor
           </Link>
           <h1 className="mt-8 text-3xl font-bold tracking-tight text-slate-900">Créer votre espace</h1>
@@ -93,7 +88,7 @@ export default function RegisterPage() {
                 value={form.pseudonyme}
                 onChange={handleChange}
                 disabled={isLoading}
-                className="w-full rounded-xl border border-slate-300 px-4 py-3"
+                className="w-full rounded-xl border border-slate-400 bg-slate-50 px-4 py-3 text-slate-900 shadow-sm transition focus:border-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-200 disabled:opacity-60"
               />
             </label>
 
@@ -106,7 +101,7 @@ export default function RegisterPage() {
                 value={form.email}
                 onChange={handleChange}
                 disabled={isLoading}
-                className="w-full rounded-xl border border-slate-300 px-4 py-3"
+                className="w-full rounded-xl border border-slate-400 bg-slate-50 px-4 py-3 text-slate-900 shadow-sm transition focus:border-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-200 disabled:opacity-60"
               />
             </label>
 
@@ -119,7 +114,7 @@ export default function RegisterPage() {
                 value={form.password}
                 onChange={handleChange}
                 disabled={isLoading}
-                className="w-full rounded-xl border border-slate-300 px-4 py-3"
+                className="w-full rounded-xl border border-slate-400 bg-slate-50 px-4 py-3 text-slate-900 shadow-sm transition focus:border-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-200 disabled:opacity-60"
               />
             </label>
 
@@ -132,17 +127,20 @@ export default function RegisterPage() {
                 value={form.confirmPassword}
                 onChange={handleChange}
                 disabled={isLoading}
-                className="w-full rounded-xl border border-slate-300 px-4 py-3"
+                className="w-full rounded-xl border border-slate-400 bg-slate-50 px-4 py-3 text-slate-900 shadow-sm transition focus:border-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-200 disabled:opacity-60"
               />
             </label>
 
-            {error && <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">{error}</div>}
+            {error && (
+              <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+                {error}
+              </div>
+            )}
 
             <button
               type="submit"
               disabled={isLoading}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-sky-700 px-5 py-3 font-semibold text-white disabled:opacity-60"
-            >
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-sky-700 px-5 py-3 font-semibold text-white disabled:opacity-60">
               <UserPlus className="h-5 w-5" />
               {isLoading ? "Création du compte..." : "Créer mon compte"}
             </button>
@@ -150,7 +148,9 @@ export default function RegisterPage() {
 
           <div className="mt-6 border-t border-slate-200 pt-6 text-center text-sm text-slate-600">
             Vous avez déjà un compte?{" "}
-            <Link to="/login" className="font-semibold text-sky-700">Se connecter</Link>
+            <Link to="/login" className="font-semibold text-sky-700">
+              Se connecter
+            </Link>
           </div>
         </section>
       </div>

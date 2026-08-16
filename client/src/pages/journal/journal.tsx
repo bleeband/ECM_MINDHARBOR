@@ -215,7 +215,13 @@ export default function JournalPage() {
               disabled={saving}
               className="rounded-xl bg-sky-700 px-6 py-3 font-semibold text-white hover:bg-sky-800 disabled:opacity-50"
             >
-              {saving ? "Enregistrement..." : "Enregistrer mon journal"}
+              {saving
+                ? journalExiste
+                  ? "Modification..."
+                  : "Enregistrement..."
+                : journalExiste
+                  ? "Modifier mon journal"
+                  : "Enregistrer mon journal"}
             </button>
           </div>
         </form>
