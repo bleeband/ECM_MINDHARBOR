@@ -27,7 +27,12 @@ export default function RegisterPage() {
   }
 
   function validateForm(): string | null {
-    if (!form.email.trim() || !form.pseudonyme.trim() || !form.password || !form.confirmPassword) {
+    if (
+      !form.email.trim() ||
+      !form.pseudonyme.trim() ||
+      !form.password ||
+      !form.confirmPassword
+    ) {
       return "Veuillez remplir tous les champs.";
     }
     if (form.pseudonyme.trim().length < 2) {
@@ -131,16 +136,13 @@ export default function RegisterPage() {
               />
             </label>
 
-            {error && (
-              <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
-                {error}
-              </div>
-            )}
+            {error && <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">{error}</div>}
 
             <button
               type="submit"
               disabled={isLoading}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-sky-700 px-5 py-3 font-semibold text-white disabled:opacity-60">
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-sky-700 px-5 py-3 font-semibold text-white disabled:opacity-60"
+            >
               <UserPlus className="h-5 w-5" />
               {isLoading ? "Création du compte..." : "Créer mon compte"}
             </button>
@@ -148,9 +150,7 @@ export default function RegisterPage() {
 
           <div className="mt-6 border-t border-slate-200 pt-6 text-center text-sm text-slate-600">
             Vous avez déjà un compte?{" "}
-            <Link to="/login" className="font-semibold text-sky-700">
-              Se connecter
-            </Link>
+            <Link to="/login" className="font-semibold text-sky-700">Se connecter</Link>
           </div>
         </section>
       </div>

@@ -4,11 +4,6 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import authRoutes from './routes/auth.routes.js';
 import journalRoutes from './routes/journal.routes.js';
-import resourcesRoutes from './routes/resources.routes.js';
-import groupeRoutes from './routes/groupe.routes.js';
-import reportRoutes from './routes/report.routes.js';
-import adminRoutes from './routes/admin.routes.js';
-import dashboardRoutes from './routes/dashboard.routes.js';
 import { errorHandler } from './middlewares/error.js';
 
 const app = express();
@@ -21,11 +16,7 @@ app.use(morgan('dev'));
 app.get('/api/v1/health', (_req, res) => res.json({ status: 'ok' }));
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/journal', journalRoutes);
-app.use('/api/v1/resources', resourcesRoutes);
-app.use('/api/v1/groups', groupeRoutes);
-app.use('/api/v1/reports', reportRoutes);
-app.use('/api/v1/admin', adminRoutes);
-app.use('/api/v1/dashboard', dashboardRoutes);
+// ... autres routeurs
 
 app.use((_req, res) => {
   res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Route introuvable.' } });
