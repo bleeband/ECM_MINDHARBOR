@@ -52,7 +52,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
           <Link to="/" className="inline-flex items-center gap-2 text-2xl font-bold text-sky-800">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-100">MH</span>
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-100">ECM</span>
             MindHarbor
           </Link>
           <h1 className="mt-8 text-3xl font-bold tracking-tight text-slate-900">Bon retour</h1>
@@ -86,13 +86,16 @@ export default function LoginPage() {
               />
             </label>
 
-            {error && <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">{error}</div>}
+            {error && (
+              <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+                {error}
+              </div>
+            )}
 
             <button
               type="submit"
               disabled={isLoading}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-sky-700 px-5 py-3 font-semibold text-white disabled:opacity-60"
-            >
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-sky-700 px-5 py-3 font-semibold text-white disabled:opacity-60">
               <LogIn className="h-5 w-5" />
               {isLoading ? "Connexion..." : "Se connecter"}
             </button>
@@ -100,7 +103,9 @@ export default function LoginPage() {
 
           <div className="mt-6 border-t border-slate-200 pt-6 text-center text-sm text-slate-600">
             Vous n'avez pas encore de compte?{" "}
-            <Link to="/register" className="font-semibold text-sky-700">Créer un compte</Link>
+            <Link to="/register" className="font-semibold text-sky-700">
+              Créer un compte
+            </Link>
           </div>
         </section>
       </div>

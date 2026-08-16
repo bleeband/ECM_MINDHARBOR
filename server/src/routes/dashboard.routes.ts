@@ -4,15 +4,20 @@ import prisma from "../utils/prisma.js";
 
 const router = Router();
 
-function startOfTodayUtc() {
-  const date = new Date();
-  date.setUTCHours(0, 0, 0, 0);
-  return date;
+function startOfTodayInQuebec() {
+  const date = new Intl.DateTimeFormat("fr-CA", {
+    timeZone: "America/Toronto",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+
+  return new Date(`${date}T00:00:00.000Z`);
 }
 
 router.get("/", requireAuth, async (req, res, next) => {
   try {
-    const today = startOfTodayUtc();
+    const today = startOfTodayInQuebec();
     const weekStart = new Date(today);
     weekStart.setUTCDate(weekStart.getUTCDate() - 6);
 

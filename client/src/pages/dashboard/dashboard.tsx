@@ -1,12 +1,52 @@
+import { useEffect, useState } from "react";
 import { ArrowRight, BookOpen, CalendarCheck, Heart, TrendingUp, Users } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+import { getDashboard } from "../../api/dashboard";
+import type { DashboardData } from "../../types/types";
+import { ErrorState, LoadingState } from "../../components/commons";
 
 export default function DashboardPage() {
-  // Données temporaires.
-  // Elles seront remplacées par les appels Axios.
-  const journalCompleted = false;
-  const { user } = useAuth();
+  const [dashboard, setDashboard] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadDashboard() {
+      try {
+        const data = await getDashboard();
+
+        if (active) {
+          setDashboard(data);
+        }
+      } catch {
+        if (active) {
+          setError("Impossible de charger votre tableau de bord.");
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void loadDashboard();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  if (loading) {
+    return <LoadingState label="Chargement de votre tableau de bord..." />;
+  }
+
+  if (error || !dashboard) {
+    return <ErrorState message={error ?? "Tableau de bord indisponible."} />;
+  }
+
+  const { journalCompleted, week } = dashboard;
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
@@ -15,7 +55,7 @@ export default function DashboardPage() {
         <section className="mb-8">
           <p className="text-sm font-medium text-sky-700">Tableau de bord</p>
 
-          <h1 className="mt-1 text-3xl font-bold">{user?.username}</h1>
+          <h1 className="mt-1 text-3xl font-bold">{dashboard.username}</h1>
 
           <p className="mt-2 text-slate-600">Voici un aperçu de votre semaine. Prenez ce qui vous est utile aujourd'hui.</p>
         </section>
@@ -66,13 +106,13 @@ export default function DashboardPage() {
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <StatCard label="Humeur" value="3.7" maximum="/ 5" />
+            <StatCard label="Humeur" value={formatScore(week.humeur)} maximum="/ 5" />
 
-            <StatCard label="Énergie" value="3.2" maximum="/ 5" />
+            <StatCard label="Énergie" value={formatScore(week.energie)} maximum="/ 5" />
 
-            <StatCard label="Sommeil" value="3.5" maximum="/ 5" />
+            <StatCard label="Sommeil" value={formatScore(week.qualite_sommeil)} maximum="/ 5" />
 
-            <StatCard label="Anxiété" value="2.8" maximum="/ 5" />
+            <StatCard label="Anxiété" value={formatScore(week.anxiete_stress)} maximum="/ 5" />
           </div>
         </section>
 
@@ -106,11 +146,11 @@ export default function DashboardPage() {
 
           {/* Insight */}
           <section className="rounded-3xl border border-slate-200 bg-white p-6">
-            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-violet-100 text-violet-700">
+            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl  bg-emerald-100 text-emerald-700">
               <TrendingUp className="h-5 w-5" />
             </div>
 
-            <p className="text-sm font-medium text-violet-700">Une tendance observée</p>
+            <p className="text-sm font-medium text-emerald-700">Une tendance observée</p>
 
             <h2 className="mt-2 text-xl font-bold">Vos journées avec une marche semblent plus positives.</h2>
 
@@ -146,7 +186,7 @@ export default function DashboardPage() {
               <GroupItem name="Équilibre travail-vie" info="1 nouvelle publication" />
             </div>
 
-            <Link to="/groups" className="mt-5 inline-flex items-center gap-2 font-semibold text-sky-700 hover:text-sky-900">
+            <Link to="/groupe" className="mt-5 inline-flex items-center gap-2 font-semibold text-sky-700 hover:text-sky-900">
               Voir mes groupes
               <ArrowRight className="h-4 w-4" />
             </Link>
@@ -179,6 +219,10 @@ export default function DashboardPage() {
       </div>
     </main>
   );
+}
+
+function formatScore(value: number | null) {
+  return value === null ? "—" : value.toFixed(1);
 }
 
 type StatCardProps = {
