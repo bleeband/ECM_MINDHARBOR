@@ -123,13 +123,6 @@ export async function obtenirEntreeParDate(userId: string, dateString: string) {
   return entree;
 }
 
-export async function getTrends(userId: string) {
-  return {
-    message: "fonctionalité en construction",
-    userId,
-  };
-}
-
 export async function modifierEntreeJournal(
   userId: string,
   dateString: string,
@@ -223,6 +216,15 @@ function obtenirDateAujourdhui() {
   }).format(new Date());
 }
 
+type MoyenneJourSemaine = {
+  jour: number;
+  humeur: number;
+  energie: number;
+  qualite_sommeil: number;
+  anxiete_stress: number;
+  total: number;
+};
+
 export async function obtenirStatsJournal(
   userId: string,
   range: "7d" | "30d" | "90d",
@@ -261,6 +263,22 @@ export async function obtenirStatsJournal(
     },
   });
 
+  const moyennesParJour = await prisma.$queryRaw<MoyenneJourSemaine[]>`
+    SELECT
+      EXTRACT(ISODOW FROM "date")::int AS "jour",
+      AVG("humeur")::float AS "humeur",
+      AVG("energie")::float AS "energie",
+      AVG("qualite_sommeil")::float AS "qualite_sommeil",
+      AVG("anxiete_stress")::float AS "anxiete_stress",
+      COUNT(*)::int AS "total"
+    FROM "JournalEntry"
+    WHERE "userId" = ${userId}
+      AND "date" >= ${dateDebut}
+      -- isodow transforme une date en 1=lundi 2=mardi ect..
+    GROUP BY EXTRACT(ISODOW FROM "date")
+    ORDER BY "jour"
+  `;
+
   return {
     series: stats.map((stat) => ({
       date: stat.date,
@@ -269,6 +287,8 @@ export async function obtenirStatsJournal(
       qualite_sommeil: stat._avg.qualite_sommeil ?? 0,
       anxiete_stress: stat._avg.anxiete_stress ?? 0,
     })),
+
+    moyennesParJour,
   };
 }
 
@@ -337,10 +357,6 @@ export async function obtenirInsightsJournal(userId: string) {
     }
   }
 
-  if (correlations.length > 0) {
-    observations.push(correlations[0]!);
-  }
-
   const moyenneGenerale = await prisma.journalEntry.aggregate({
     where: {
       userId,
@@ -371,6 +387,50 @@ export async function obtenirInsightsJournal(userId: string) {
         "Votre niveau d'anxiété moyen est élevé dans vos entrées récentes.",
       );
     }
+  }
+
+  const moyennesParJour = await prisma.$queryRaw<MoyenneJourSemaine[]>`
+    SELECT
+      EXTRACT(ISODOW FROM "date")::int AS "jour",
+      AVG("humeur")::float AS "humeur",
+      AVG("energie")::float AS "energie",
+      AVG("qualite_sommeil")::float AS "qualite_sommeil",
+      AVG("anxiete_stress")::float AS "anxiete_stress",
+      COUNT(*)::int AS "total"
+    FROM "JournalEntry"
+    WHERE "userId" = ${userId}
+    GROUP BY EXTRACT(ISODOW FROM "date")
+    HAVING COUNT(*) >= 5
+    ORDER BY "jour"
+  `;
+
+  const nomsJours = [
+    "",
+    "lundi",
+    "mardi",
+    "mercredi",
+    "jeudi",
+    "vendredi",
+    "samedi",
+    "dimanche",
+  ];
+
+  if (moyennesParJour.length > 0) {
+    const humeurPlusBasse = moyennesParJour.reduce((plusBasse, jour) =>
+      jour.humeur < plusBasse.humeur ? jour : plusBasse,
+    );
+
+    const anxietePlusElevee = moyennesParJour.reduce((plusElevee, jour) =>
+      jour.anxiete_stress > plusElevee.anxiete_stress ? jour : plusElevee,
+    );
+
+    observations.push(
+      `Votre humeur moyenne est la plus basse le ${nomsJours[humeurPlusBasse.jour]} (${humeurPlusBasse.humeur.toFixed(1)}/5).`,
+    );
+
+    observations.push(
+      `Votre niveau d'anxiété moyen est le plus élevé le ${nomsJours[anxietePlusElevee.jour]} (${anxietePlusElevee.anxiete_stress.toFixed(1)}/5).`,
+    );
   }
 
   return {
