@@ -26,7 +26,7 @@ api.interceptors.response.use(
         const { data } = await refreshing;
         refreshing = null;
         localStorage.setItem("accessToken", data.accessToken);
-        return api(original); // on rejoue la requete d’origine
+        return api(original); // on rejoue la requete d'origine
       } catch {
         refreshing = null;
         localStorage.clear();

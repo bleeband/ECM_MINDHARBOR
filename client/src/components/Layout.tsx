@@ -20,6 +20,7 @@ const menuLinks: MenuLink[] = [
   { to: "/journal", label: "Journal", protected: true },
   { to: "/analyse", label: "Tendances", protected: true },
   { to: "/groupe", label: "Groupes", protected: true },
+  { to: "/messagerie", label: "Messagerie", protected: true },
 ];
 
 export function Layout({ children }: LayoutProps) {
@@ -40,14 +41,14 @@ export function Layout({ children }: LayoutProps) {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
-      <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
+      <header className="sticky top-0 z-30 border-b border-slate-200 bg-white">
         <div className="mx-auto flex min-h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
           <Link
             to="/"
             onClick={closeMenu}
             className="inline-flex shrink-0 items-center gap-2 text-lg font-bold text-sky-800"
           >
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-sky-100 text-sm">
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-sky-100 text-sm">
               ECM
             </span>
             MindHarbor
@@ -171,7 +172,7 @@ function NavItem({
       end={to === "/"}
       onClick={onClick}
       className={({ isActive }) =>
-        `rounded-xl px-3 py-2 text-sm font-semibold transition ${
+        `rounded-lg px-3 py-2 text-sm font-semibold transition ${
           isActive
             ? "bg-sky-100 text-sky-800"
             : "text-slate-700 hover:bg-slate-100"

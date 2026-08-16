@@ -23,14 +23,7 @@ export default function JournalPage() {
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
 
-  function updateScale(
-    field:
-      | "humeur"
-      | "energie"
-      | "qualite_sommeil"
-      | "anxiete_stress",
-    value: number,
-  ) {
+  function updateScale(field: "humeur" | "energie" | "qualite_sommeil" | "anxiete_stress", value: number) {
     setForm((current) => ({ ...current, [field]: value }));
   }
 
@@ -43,12 +36,7 @@ export default function JournalPage() {
     setError("");
     setSuccess("");
 
-    if (
-      !form.humeur ||
-      !form.energie ||
-      !form.qualite_sommeil ||
-      !form.anxiete_stress
-    ) {
+    if (!form.humeur || !form.energie || !form.qualite_sommeil || !form.anxiete_stress) {
       setError("Veuillez répondre aux quatre indicateurs.");
       return;
     }
@@ -76,37 +64,22 @@ export default function JournalPage() {
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-8">
       <div className="mx-auto max-w-4xl">
-        <h1 className="mb-10 text-center text-3xl font-bold">
-          Mon journal de bien-être
-        </h1>
+        <h1 className="mb-10 text-center text-3xl font-bold">Mon journal de bien-être</h1>
 
-        <form
-          onSubmit={handleSubmit}
-          className="grid gap-10 rounded-3xl border border-slate-200 bg-white p-6 lg:grid-cols-2 lg:p-10"
-        >
+        <form onSubmit={handleSubmit} className="grid gap-10 rounded-3xl border border-slate-200 bg-white p-6 lg:grid-cols-2 lg:p-10">
           <section className="space-y-8">
             <label className="block">
               <span className="mb-2 block font-semibold">Date</span>
               <input
                 type="date"
                 value={form.date}
-                onChange={(event) =>
-                  setForm((current) => ({ ...current, date: event.target.value }))
-                }
+                onChange={(event) => setForm((current) => ({ ...current, date: event.target.value }))}
                 className="rounded-xl border border-slate-300 px-4 py-3"
               />
             </label>
 
-            <ScaleQuestion
-              label="Aujourd'hui, mon humeur est..."
-              value={form.humeur}
-              onChange={(value) => updateScale("humeur", value)}
-            />
-            <ScaleQuestion
-              label="Mon niveau d'énergie est..."
-              value={form.energie}
-              onChange={(value) => updateScale("energie", value)}
-            />
+            <ScaleQuestion label="Aujourd'hui, mon humeur est..." value={form.humeur} onChange={(value) => updateScale("humeur", value)} />
+            <ScaleQuestion label="Mon niveau d'énergie est..." value={form.energie} onChange={(value) => updateScale("energie", value)} />
             <ScaleQuestion
               label="La qualité de mon sommeil est..."
               value={form.qualite_sommeil}
@@ -132,9 +105,7 @@ export default function JournalPage() {
             </label>
 
             <label className="block">
-              <span className="mb-2 block font-semibold">
-                Gratitude du jour (facultatif)
-              </span>
+              <span className="mb-2 block font-semibold">Gratitude du jour (facultatif)</span>
               <textarea
                 value={form.gratitude}
                 onChange={(event) => updateText("gratitude", event.target.value)}
@@ -144,27 +115,17 @@ export default function JournalPage() {
             </label>
 
             <p className="text-sm text-slate-600">
-              Les activités doivent être envoyées comme identifiants `Activity.id`
-              lorsque l'API des activités sera disponible.
+              Les activités doivent être envoyées comme identifiants `Activity.id` lorsque l'API des activités sera disponible.
             </p>
           </section>
 
           <div className="lg:col-span-2">
-            {error && (
-              <div className="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-rose-800">
-                {error}
-              </div>
-            )}
-            {success && (
-              <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-800">
-                {success}
-              </div>
-            )}
+            {error && <div className="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-rose-800">{error}</div>}
+            {success && <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-800">{success}</div>}
             <button
               type="submit"
               disabled={saving}
-              className="rounded-xl bg-sky-700 px-6 py-3 font-semibold text-white hover:bg-sky-800 disabled:opacity-50"
-            >
+              className="rounded-xl bg-sky-700 px-6 py-3 font-semibold text-white hover:bg-sky-800 disabled:opacity-50">
               {saving ? "Enregistrement..." : "Enregistrer mon journal"}
             </button>
           </div>
@@ -186,16 +147,8 @@ function ScaleQuestion({ label, value, onChange }: ScaleQuestionProps) {
       <legend className="mb-4 font-semibold">{label}</legend>
       <div className="flex flex-wrap gap-5">
         {[1, 2, 3, 4, 5].map((number) => (
-          <label
-            key={number}
-            className="flex cursor-pointer flex-col items-center gap-2"
-          >
-            <input
-              type="radio"
-              checked={value === number}
-              onChange={() => onChange(number)}
-              className="h-5 w-5"
-            />
+          <label key={number} className="flex cursor-pointer flex-col items-center gap-2">
+            <input type="radio" checked={value === number} onChange={() => onChange(number)} className="h-5 w-5" />
             <span className="text-sm text-slate-600">{number}</span>
           </label>
         ))}

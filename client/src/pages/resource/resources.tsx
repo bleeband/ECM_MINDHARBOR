@@ -1,26 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
-import {
-  BookOpen,
-  ExternalLink,
-  Heart,
-  MapPin,
-  MessageCircle,
-  Phone,
-  Search,
-  ShieldAlert,
-  Users,
-} from "lucide-react";
-import {
-  addFavorite,
-  getResources,
-  removeFavorite,
-} from "../../api/resources";
-import {
-  EmptyState,
-  ErrorState,
-  LoadingState,
-  Pagination,
-} from "../../components/commons";
+import { BookOpen, ExternalLink, Heart, MapPin, MessageCircle, Phone, Search, ShieldAlert, Users } from "lucide-react";
+import { addFavorite, getResources, removeFavorite } from "../../api/resources";
+import { EmptyState, ErrorState, LoadingState, Pagination } from "../../components/commons";
 import type { Resource, TypeResource } from "../../types/types";
 
 type OfficialResource = {
@@ -33,50 +14,43 @@ type OfficialResource = {
 const officialResources: OfficialResource[] = [
   {
     titre: "Info-Social 811",
-    description:
-      "Parlez gratuitement et confidentiellement à un professionnel en intervention psychosociale.",
+    description: "Parlez gratuitement et confidentiellement à un professionnel en intervention psychosociale.",
     url: "https://www.quebec.ca/sante/trouver-une-ressource/info-social-811",
     categorie: "Aide et orientation",
   },
   {
     titre: "Trouver un centre de crise",
-    description:
-      "Repérez une ressource gratuite et spécialisée en intervention de crise près de chez vous.",
+    description: "Repérez une ressource gratuite et spécialisée en intervention de crise près de chez vous.",
     url: "https://resicq.ca/liste-centres-crise/",
     categorie: "Crise",
   },
   {
     titre: "Tel-jeunes",
-    description:
-      "Soutien confidentiel pour les jeunes par téléphone, texto ou clavardage.",
+    description: "Soutien confidentiel pour les jeunes par téléphone, texto ou clavardage.",
     url: "https://www.teljeunes.com/",
     categorie: "Jeunes",
   },
   {
     titre: "Relief",
-    description:
-      "Information et soutien pour vivre avec l'anxiété, la dépression ou la bipolarité.",
+    description: "Information et soutien pour vivre avec l'anxiété, la dépression ou la bipolarité.",
     url: "https://relief.ca/",
     categorie: "Anxiété et humeur",
   },
   {
     titre: "Phobies-Zéro",
-    description:
-      "Soutien et groupes d'entraide pour les troubles anxieux, incluant le TOC.",
+    description: "Soutien et groupes d'entraide pour les troubles anxieux, incluant le TOC.",
     url: "https://www.phobies-zero.qc.ca/",
     categorie: "Anxiété",
   },
   {
     titre: "CAP santé mentale",
-    description:
-      "Information et soutien pour les proches d'une personne vivant avec un trouble mental.",
+    description: "Information et soutien pour les proches d'une personne vivant avec un trouble mental.",
     url: "https://www.capsantementale.ca/portail-information/",
     categorie: "Proches",
   },
   {
     titre: "Aire ouverte",
-    description:
-      "Services de santé et de bien-être pour les jeunes de 12 à 25 ans.",
+    description: "Services de santé et de bien-être pour les jeunes de 12 à 25 ans.",
     url: "https://www.quebec.ca/sante/trouver-une-ressource/aire-ouverte",
     categorie: "Jeunes",
   },
@@ -157,13 +131,7 @@ export default function ResourcesPage() {
         await addFavorite(resource.id);
       }
 
-      setItems((current) =>
-        current.map((item) =>
-          item.id === resource.id
-            ? { ...item, isFavorite: !item.isFavorite }
-            : item,
-        ),
-      );
+      setItems((current) => current.map((item) => (item.id === resource.id ? { ...item, isFavorite: !item.isFavorite } : item)));
     } catch {
       setError("Impossible de modifier les favoris.");
     } finally {
@@ -177,9 +145,7 @@ export default function ResourcesPage() {
         <header className="mb-8">
           <p className="text-sm font-semibold text-sky-700">Ressources</p>
           <h1 className="mt-1 text-3xl font-bold">Trouver de l'aide au Québec</h1>
-          <p className="mt-2 max-w-3xl text-slate-600">
-            Des ressources officielles et communautaires pour vous ou un proche.
-          </p>
+          <p className="mt-2 max-w-3xl text-slate-600">Des ressources officielles et communautaires pour vous ou un proche.</p>
         </header>
 
         <section className="rounded-3xl border border-rose-200 bg-rose-50 p-5 sm:p-6" aria-labelledby="urgence-title">
@@ -193,29 +159,28 @@ export default function ResourcesPage() {
                 Vous n'avez pas à traverser ça seul·e.
               </h2>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-700">
-                En cas de danger immédiat pour vous ou un proche, appelez le 911.
-                Pour du soutien concernant le suicide, la ligne québécoise est
-                disponible au 1 866 APPELLE (277-3553), par texto au 535353 ou
-                par clavardage.
+                En cas de danger immédiat pour vous ou un proche, appelez le 911. Pour du soutien concernant le suicide, la ligne québécoise est
+                disponible au 1 866 APPELLE (277-3553), par texto au 535353 ou par clavardage.
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
-                <a href="tel:911" className="inline-flex items-center gap-2 rounded-xl bg-rose-700 px-4 py-2.5 text-sm font-bold text-white hover:bg-rose-800">
+                <a
+                  href="tel:911"
+                  className="inline-flex items-center gap-2 rounded-xl bg-rose-700 px-4 py-2.5 text-sm font-bold text-white hover:bg-rose-800">
                   <Phone className="h-4 w-4" />
                   Appeler le 911
                 </a>
-                <a href="tel:18662773553" className="inline-flex items-center gap-2 rounded-xl border border-rose-300 bg-white px-4 py-2.5 text-sm font-bold text-rose-800 hover:bg-rose-100">
-                  <Phone className="h-4 w-4" />
-                  1 866 APPELLE
+                <a
+                  href="tel:18662773553"
+                  className="inline-flex items-center gap-2 rounded-xl border border-rose-300 bg-white px-4 py-2.5 text-sm font-bold text-rose-800 hover:bg-rose-100">
+                  <Phone className="h-4 w-4" />1 866 APPELLE
                 </a>
-                <a href="sms:535353" className="inline-flex items-center gap-2 rounded-xl border border-rose-300 bg-white px-4 py-2.5 text-sm font-bold text-rose-800 hover:bg-rose-100">
+                <a
+                  href="sms:535353"
+                  className="inline-flex items-center gap-2 rounded-xl border border-rose-300 bg-white px-4 py-2.5 text-sm font-bold text-rose-800 hover:bg-rose-100">
                   <MessageCircle className="h-4 w-4" />
                   Texto 535353
                 </a>
-                <ExternalResourceLink
-                  href="https://suicide.ca/fr/clavarder-avec-un-intervenant"
-                  label="Clavarder"
-                  danger
-                />
+                <ExternalResourceLink href="https://suicide.ca/fr/clavarder-avec-un-intervenant" label="Clavarder" danger />
               </div>
             </div>
           </div>
@@ -239,15 +204,11 @@ export default function ResourcesPage() {
             {officialResources.map((resource) => (
               <article key={resource.titre} className="flex flex-col rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
                 <div className="flex items-start justify-between gap-3">
-                  <span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-bold text-sky-800">
-                    {resource.categorie}
-                  </span>
+                  <span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-bold text-sky-800">{resource.categorie}</span>
                   <MapPin className="h-5 w-5 text-sky-700" />
                 </div>
                 <h3 className="mt-4 text-xl font-bold">{resource.titre}</h3>
-                <p className="mt-2 flex-1 text-sm leading-6 text-slate-600">
-                  {resource.description}
-                </p>
+                <p className="mt-2 flex-1 text-sm leading-6 text-slate-600">{resource.description}</p>
                 <ExternalResourceLink href={resource.url} label="Accéder à la ressource" />
               </article>
             ))}
@@ -260,10 +221,10 @@ export default function ResourcesPage() {
               <BookOpen className="h-5 w-5" />
             </div>
             <div>
-              <h2 id="bibliotheque-title" className="text-2xl font-bold">Bibliothèque MindHarbor</h2>
-              <p className="mt-1 text-slate-600">
-                Explorez aussi les ressources ajoutées par l'équipe.
-              </p>
+              <h2 id="bibliotheque-title" className="text-2xl font-bold">
+                Bibliothèque MindHarbor
+              </h2>
+              <p className="mt-1 text-slate-600">Explorez aussi les ressources ajoutées par l'équipe.</p>
             </div>
           </div>
 
@@ -276,7 +237,9 @@ export default function ResourcesPage() {
                 placeholder="Rechercher dans la bibliothèque..."
                 className="flex-1 rounded-xl border border-slate-300 px-4 py-3"
               />
-              <button type="submit" className="inline-flex items-center justify-center gap-2 rounded-xl bg-sky-700 px-5 py-3 font-semibold text-white hover:bg-sky-800">
+              <button
+                type="submit"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-sky-700 px-5 py-3 font-semibold text-white hover:bg-sky-800">
                 <Search className="h-4 w-4" />
                 Rechercher
               </button>
@@ -285,8 +248,7 @@ export default function ResourcesPage() {
             <select
               value={type}
               onChange={(event) => handleTypeChange(event.target.value as TypeResource | "")}
-              className="mt-4 rounded-xl border border-slate-300 bg-white px-4 py-3"
-            >
+              className="mt-4 rounded-xl border border-slate-300 bg-white px-4 py-3">
               <option value="">Tous les types</option>
               <option value="ARTICLE">Article</option>
               <option value="EXERCICE">Exercice</option>
@@ -315,8 +277,7 @@ export default function ResourcesPage() {
                         disabled={favoriteLoading === resource.id}
                         onClick={() => void handleFavorite(resource)}
                         aria-label="Ajouter ou retirer des favoris"
-                        className="rounded-xl p-2 hover:bg-slate-100 disabled:opacity-50"
-                      >
+                        className="rounded-xl p-2 hover:bg-slate-100 disabled:opacity-50">
                         <Heart className={`h-5 w-5 ${resource.isFavorite ? "fill-rose-600 text-rose-600" : "text-slate-400"}`} />
                       </button>
                     </div>
@@ -339,32 +300,20 @@ export default function ResourcesPage() {
 
         <p className="mt-10 flex items-center gap-2 text-xs leading-5 text-slate-500">
           <Users className="h-4 w-4 shrink-0" />
-          Cette page oriente vers des ressources; elle ne remplace pas une aide
-          médicale ou d'urgence.
+          Cette page oriente vers des ressources; elle ne remplace pas une aide médicale ou d'urgence.
         </p>
       </div>
     </main>
   );
 }
 
-function ExternalResourceLink({
-  href,
-  label,
-  danger = false,
-}: {
-  href: string;
-  label: string;
-  danger?: boolean;
-}) {
+function ExternalResourceLink({ href, label, danger = false }: { href: string; label: string; danger?: boolean }) {
   return (
     <a
       href={href}
       target="_blank"
       rel="noreferrer"
-      className={`mt-4 inline-flex items-center gap-2 text-sm font-bold ${
-        danger ? "text-rose-800" : "text-sky-700"
-      }`}
-    >
+      className={`mt-4 inline-flex items-center gap-2 text-sm font-bold ${danger ? "text-rose-800" : "text-sky-700"}`}>
       {label}
       <ExternalLink className="h-4 w-4" />
     </a>

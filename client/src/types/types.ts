@@ -115,6 +115,19 @@ export type Resource = {
   isFavorite?: boolean;
 };
 
+export type DashboardData = {
+  username: string;
+  journalCompleted: boolean;
+  week: {
+    entryCount: number;
+    humeur: number | null;
+    energie: number | null;
+    qualite_sommeil: number | null;
+    anxiete_stress: number | null;
+  };
+  suggestion: Resource | null;
+};
+
 export type Favorite = {
   userId: string;
   resourceId: string;
