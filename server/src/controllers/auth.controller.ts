@@ -1,24 +1,11 @@
 import type { NextFunction, Request, Response } from "express";
 import { AppError } from "../middlewares/error.js";
-import type {
-  LoginInput,
-  RefreshInput,
-  RegisterInput,
-} from "../schemas/auth.schema.js";
+import type { LoginInput, RefreshInput, RegisterInput } from "../schemas/auth.schema.js";
 import { createAccessToken, verifyRefreshToken } from "../utils/jwt.js";
 import prisma from "../utils/prisma.js";
-import {
-  connecterUtilisateur,
-  inscrireUtilisateur,
-  supprimerRefreshToken,
-  trouverRefreshToken,
-} from "../services/auth.service.js";
+import { connecterUtilisateur, inscrireUtilisateur, supprimerRefreshToken, trouverRefreshToken } from "../services/auth.service.js";
 
-export async function register(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) {
+export async function register(req: Request, res: Response, next: NextFunction) {
   try {
     const utilisateur = await inscrireUtilisateur(req.body as RegisterInput);
     res.status(201).json({ user: utilisateur });
@@ -36,22 +23,14 @@ export async function login(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-export async function refresh(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) {
+export async function refresh(req: Request, res: Response, next: NextFunction) {
   try {
     const { refreshToken } = req.body as RefreshInput;
     const payload = verifyRefreshToken(refreshToken);
     const tokenEnregistre = await trouverRefreshToken(refreshToken);
 
     if (!tokenEnregistre) {
-      throw new AppError(
-        401,
-        "INVALID_REFRESH_TOKEN",
-        "Refresh token invalide ou expiré.",
-      );
+      throw new AppError(401, "INVALID_REFRESH_TOKEN", "Refresh token invalide ou expiré.");
     }
 
     const accessToken = createAccessToken({
@@ -65,21 +44,11 @@ export async function refresh(
       return next(error);
     }
 
-    next(
-      new AppError(
-        401,
-        "INVALID_REFRESH_TOKEN",
-        "Refresh token invalide ou expiré.",
-      ),
-    );
+    next(new AppError(401, "INVALID_REFRESH_TOKEN", "Refresh token invalide ou expiré."));
   }
 }
 
-export async function logout(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) {
+export async function logout(req: Request, res: Response, next: NextFunction) {
   try {
     const { refreshToken } = req.body as RefreshInput;
     await supprimerRefreshToken(refreshToken);
