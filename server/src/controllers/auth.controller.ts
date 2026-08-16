@@ -36,11 +36,7 @@ export async function login(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-export async function refresh(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) {
+export async function refresh(req: Request, res: Response, next: NextFunction) {
   try {
     const { refreshToken } = req.body as RefreshInput;
     const payload = verifyRefreshToken(refreshToken);
@@ -75,14 +71,10 @@ export async function refresh(
   }
 }
 
-export async function logout(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) {
+export async function logout(req: Request, res: Response, next: NextFunction) {
   try {
     const { refreshToken } = req.body as RefreshInput;
-    await supprimerRefreshToken(refreshToken);
+    await supprimerRefreshToken(refreshToken, req.user!.userId);
     res.status(204).send();
   } catch (error) {
     next(error);
