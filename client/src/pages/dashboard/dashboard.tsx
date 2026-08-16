@@ -1,10 +1,12 @@
 import { ArrowRight, BookOpen, CalendarCheck, Heart, TrendingUp, Users } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 export default function DashboardPage() {
   // Données temporaires.
   // Elles seront remplacées par les appels Axios.
   const journalCompleted = false;
+  const { user } = useAuth();
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
@@ -13,7 +15,7 @@ export default function DashboardPage() {
         <section className="mb-8">
           <p className="text-sm font-medium text-sky-700">Tableau de bord</p>
 
-          <h1 className="mt-1 text-3xl font-bold">Bonjour Sophie</h1>
+          <h1 className="mt-1 text-3xl font-bold">{user?.username}</h1>
 
           <p className="mt-2 text-slate-600">Voici un aperçu de votre semaine. Prenez ce qui vous est utile aujourd'hui.</p>
         </section>
