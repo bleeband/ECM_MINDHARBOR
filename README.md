@@ -1,7 +1,7 @@
 # ECMMindHarbor
 
 **Cours :** Service Web – Groupe 25604 – Session Été 2026  
-**Équipe :** <Nom de l'équipe>  
+**Équipe :** ECM
 **Membres :**
 
 - Eva Bessette
@@ -24,8 +24,9 @@ cd ecm_mindharbor
 
 ```bash
 cd server
+cp .env.example .env
 npm install
-
+npm run dev
 ```
 
 ### 3. Configuration du Client (Frontend)
