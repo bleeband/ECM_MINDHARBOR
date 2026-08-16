@@ -5,18 +5,17 @@ export default function HomePage() {
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
       {/* Hero */}
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
+      <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
           <div>
             <span className="mb-4 inline-flex rounded-full bg-sky-100 px-4 py-2 text-sm font-medium text-sky-800">
-              Un espace pour prendre soin de vous
+              Un outil simple, à votre rythme
             </span>
 
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">Votre bien-être, un jour à la fois.</h1>
+            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">Comment ça va aujourd'hui?</h1>
 
             <p className="mt-6 max-w-xl text-lg leading-8 text-slate-600">
-              ECMMindHarbor vous aide à suivre votre bien-être, découvrir des ressources adaptées et échanger dans des groupes de soutien
-              respectueux et sécuritaires.
+              MindHarbor vous permet de noter votre journée, de consulter des ressources et de participer à des espaces de soutien.
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -31,8 +30,8 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="rounded-3xl bg-white p-8 shadow-sm">
-            <div className="grid gap-5 sm:grid-cols-2">
+          <div className="border border-slate-200 bg-white p-5 sm:p-6">
+            <div className="grid gap-3 sm:grid-cols-2">
               <FeatureCard
                 icon={<Heart className="h-6 w-6" />}
                 title="Journal de bien-être"
@@ -62,14 +61,14 @@ export default function HomePage() {
       </section>
 
       {/* Ressources */}
-      <section className="bg-white py-16">
+      <section className="border-y border-slate-200 bg-white py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-8">
-            <h2 className="text-3xl font-bold">Ressources pour vous accompagner</h2>
-            <p className="mt-2 text-slate-600">Des outils simples pour vous aider à travers différentes situations.</p>
+            <h2 className="text-3xl font-bold">Quelques pistes utiles</h2>
+            <p className="mt-2 text-slate-600">Des outils simples pour les journées plus difficiles ou chargées.</p>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-3">
             <ResourceCard
               title="Respiration 4-7-8"
               category="Anxiété"
@@ -101,13 +100,13 @@ export default function HomePage() {
       </section>
 
       {/* Groupes */}
-      <section className="py-16">
+      <section className="py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold">Groupes de soutien</h2>
 
           <p className="mt-2 max-w-2xl text-slate-600">Découvrez des espaces d'échange autour de sujets qui vous touchent.</p>
 
-          <div className="mt-8 grid gap-6 md:grid-cols-3">
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
             <GroupCard title="Mieux vivre avec l'anxiété" description="Un espace d'écoute et de partage autour de l'anxiété." />
 
             <GroupCard title="Sommeil et récupération" description="Partager des expériences et stratégies pour mieux récupérer." />
@@ -116,7 +115,7 @@ export default function HomePage() {
           </div>
 
           <div className="mt-8">
-            <Link to="/groups" className="font-semibold text-sky-700 hover:text-sky-900">
+            <Link to="/groupe" className="font-semibold text-sky-700 hover:text-sky-900">
               Explorer les groupes →
             </Link>
           </div>
@@ -126,7 +125,7 @@ export default function HomePage() {
       {/* Urgence */}
       <section className="bg-rose-50 py-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="rounded-2xl border border-rose-200 bg-white p-6">
+          <div className="border border-rose-200 bg-white p-6">
             <h2 className="text-xl font-bold text-rose-900">Besoin d'aide maintenant?</h2>
 
             <p className="mt-2 max-w-3xl text-slate-700">
@@ -152,8 +151,8 @@ type FeatureCardProps = {
 
 function FeatureCard({ icon, title, description }: FeatureCardProps) {
   return (
-    <article className="rounded-2xl border border-slate-200 p-5">
-      <div className="mb-4 inline-flex rounded-xl bg-sky-100 p-3 text-sky-800">{icon}</div>
+    <article className="border border-slate-200 p-5">
+      <div className="mb-4 inline-flex rounded-lg bg-sky-100 p-3 text-sky-800">{icon}</div>
 
       <h2 className="font-semibold">{title}</h2>
 
@@ -171,7 +170,7 @@ type ResourceCardProps = {
 
 function ResourceCard({ title, category, duration, description }: ResourceCardProps) {
   return (
-    <article className="rounded-2xl border border-slate-200 p-6">
+    <article className="border border-slate-200 p-5">
       <div className="flex gap-2 text-sm text-slate-500">
         <span>{category}</span>
         <span>•</span>
@@ -192,7 +191,7 @@ type GroupCardProps = {
 
 function GroupCard({ title, description }: GroupCardProps) {
   return (
-    <article className="rounded-2xl bg-white p-6 shadow-sm">
+    <article className="border border-slate-200 bg-white p-5">
       <Users className="h-6 w-6 text-sky-700" />
 
       <h3 className="mt-4 text-lg font-semibold">{title}</h3>
