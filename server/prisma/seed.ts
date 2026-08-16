@@ -6,7 +6,9 @@ import { PrismaNeon } from "@prisma/adapter-neon";
 const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
+await prisma.journalActivity.deleteMany();
 await prisma.journalEntry.deleteMany();
+await prisma.activity.deleteMany();
 
 // fonction pour obtenir un chiffre aléatoire entre 1 et 5 inclusif:
 
@@ -41,6 +43,8 @@ await prisma.activity.createMany({
   ],
 });
 
+const activities = await prisma.activity.findMany();
+
 // loop pour créer 90 journal entries avec valeurs aléatoires et dates adjacentes:
 
 for (let i: number = 0; i < 90; i += 1) {
@@ -55,13 +59,15 @@ for (let i: number = 0; i < 90; i += 1) {
       anxiete_stress: getRandomInt(1, 5),
       evenements: evenementsListe[getRandomInt(0, evenementsListe.length - 1)],
       userId: "cmsttqsje0000i4vuahfp43bh",
+      activities: {
+        create: [
+          { activityId: activities[getRandomInt(0, activities.length - 1)].id },
+        ],
+      },
     },
   });
 }
 
-// test ajout activités
-
-console.log(await prisma.activity.findMany());
 // afficher les journal entries crééés:
 
 // console.log(await prisma.journalEntry.findMany());
