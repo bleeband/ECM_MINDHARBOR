@@ -30,9 +30,7 @@ VITE_API_URL=http://localhost:3000/api/v1
 
 ```bash
 npm run dev
-npm run build
-npm run preview
-npm run typecheck
+
 ```
 
 ## Fonctionnalités couvertes
@@ -42,8 +40,8 @@ npm run typecheck
 - Journal quotidien avec historique.
 - Tendances avec graphique.
 - Ressources avec recherche et favoris.
-- Groupes de soutien.
-- Messagerie privée.
+- Groupes de soutien. A VENIR
+- Messagerie privée. A VENIR
 - Profil.
 - Administration de base.
 
