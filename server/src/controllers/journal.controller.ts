@@ -1,12 +1,14 @@
 import type { Request, Response, NextFunction } from "express";
 import type {
   CreateJournalInput,
-  JournalDateQuery,
+  JournalDateParams,
+  UpdateJournalInput,
 } from "../schemas/journal.schema.js";
 import {
   creerEntreeJournal,
   obtenirJournal,
   obtenirEntreeParDate,
+  modifierEntreeJournal,
 } from "../services/journal.service.js";
 import { parsePagination, buildMeta } from "../utils/paginate.js";
 
@@ -56,9 +58,29 @@ export async function getJournalByDate(
   next: NextFunction,
 ) {
   try {
-    const { date } = req.query as unknown as JournalDateQuery;
+    const { date } = req.params as JournalDateParams;
 
     const entree = await obtenirEntreeParDate(req.user!.userId, date);
+
+    res.status(200).json(entree);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function updateJournal(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const { date } = req.params as JournalDateParams;
+
+    const entree = await modifierEntreeJournal(
+      req.user!.userId,
+      date,
+      req.body as UpdateJournalInput,
+    );
 
     res.status(200).json(entree);
   } catch (error) {

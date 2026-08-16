@@ -139,10 +139,28 @@ Authorization: Bearer {{accessToken}}
 GET {{baseUrl}}/journal?page=2&limit=20
 Authorization: Bearer {{accessToken}}
 
-### Journal par date
-GET {{baseUrl}}/journal/date?date=2026-05-02
+### Lire journal par date
+GET {{baseUrl}}/journal/2026-08-15
 Authorization: Bearer {{accessToken}}
 
 ### Journal date invalide
 GET {{baseUrl}}/journal/date?date=allo
 Authorization: Bearer {{accessToken}}
+
+### Modifier journal du jour
+PATCH {{baseUrl}}/journal/2026-08-15
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "humeur": 5
+}
+
+### Modifier ancien journal - interdit
+PATCH {{baseUrl}}/journal/2026-05-02
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "humeur": 5
+}

@@ -1,6 +1,9 @@
 import prisma from "../utils/prisma.js";
-import type { CreateJournalInput } from "../schemas/journal.schema.js";
 import { AppError } from "../middlewares/error.js";
+import type {
+  CreateJournalInput,
+  UpdateJournalInput,
+} from "../schemas/journal.schema.js";
 
 export async function creerEntreeJournal(
   userId: string,
@@ -125,4 +128,97 @@ export async function getTrends(userId: string) {
     message: "fonctionalité en construction",
     userId,
   };
+}
+
+export async function modifierEntreeJournal(
+  userId: string,
+  dateString: string,
+  data: UpdateJournalInput,
+) {
+  const date = new Date(`${dateString}T00:00:00.000Z`);
+  if (dateString !== obtenirDateAujourdhui()) {
+    throw new AppError(
+      403,
+      "JOURNAL_EDIT_EXPIRED",
+      "Cette entrée ne peut plus être modifiée.",
+    );
+  }
+
+  const entreeExistante = await prisma.journalEntry.findUnique({
+    where: {
+      userId_date: {
+        userId,
+        date,
+      },
+    },
+  });
+
+  if (!entreeExistante) {
+    throw new AppError(
+      404,
+      "JOURNAL_NOT_FOUND",
+      "Aucune entrée trouvée pour cette date.",
+    );
+  }
+
+  return prisma.journalEntry.update({
+    where: {
+      userId_date: {
+        userId,
+        date,
+      },
+    },
+
+    data: {
+      ...(data.humeur !== undefined && {
+        humeur: data.humeur,
+      }),
+
+      ...(data.energie !== undefined && {
+        energie: data.energie,
+      }),
+
+      ...(data.qualite_sommeil !== undefined && {
+        qualite_sommeil: data.qualite_sommeil,
+      }),
+
+      ...(data.anxiete_stress !== undefined && {
+        anxiete_stress: data.anxiete_stress,
+      }),
+
+      ...(data.evenements !== undefined && {
+        evenements: data.evenements,
+      }),
+
+      ...(data.gratitude !== undefined && {
+        gratitude: data.gratitude,
+      }),
+
+      ...(data.activityIds !== undefined && {
+        activities: {
+          deleteMany: {},
+          create: data.activityIds.map((activityId) => ({
+            activityId,
+          })),
+        },
+      }),
+    },
+
+    include: {
+      activities: {
+        include: {
+          activity: true,
+        },
+      },
+    },
+  });
+}
+
+function obtenirDateAujourdhui() {
+  return new Intl.DateTimeFormat("fr-CA", {
+    timeZone: "America/Toronto",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
 }

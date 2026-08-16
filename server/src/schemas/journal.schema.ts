@@ -20,7 +20,11 @@ const journalBodySchema = z.object({
   activityIds: z.array(z.string()).optional(),
 });
 
-const dateQuerySchema = z.object({
+const updateJournalBodySchema = journalBodySchema
+  .omit({ date: true })
+  .partial();
+
+const dateParamsSchema = z.object({
   date: z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/, "La date doit être au format YYYY-MM-DD"),
@@ -28,8 +32,14 @@ const dateQuerySchema = z.object({
 
 export const journalDateSchema = z.object({
   body: z.object({}).optional(),
-  params: z.object({}),
-  query: dateQuerySchema,
+  params: dateParamsSchema,
+  query: z.object({}),
+});
+
+export const updateJournalSchema = z.object({
+  body: updateJournalBodySchema,
+  params: dateParamsSchema,
+  query: z.object({}),
 });
 
 export const createJournalSchema = z.object({
@@ -39,4 +49,5 @@ export const createJournalSchema = z.object({
 });
 
 export type CreateJournalInput = z.infer<typeof journalBodySchema>;
-export type JournalDateQuery = z.infer<typeof dateQuerySchema>;
+export type JournalDateParams = z.infer<typeof dateParamsSchema>;
+export type UpdateJournalInput = z.infer<typeof updateJournalBodySchema>;
