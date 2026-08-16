@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@prisma/adapter-neon": "^7.9.1"
+  }
+}
