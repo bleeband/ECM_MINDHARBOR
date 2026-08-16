@@ -1,10 +1,6 @@
 // Contrats frontend alignés sur server/prisma/schema.prisma.
 
-export type Role =
-  | "VISITEUR"
-  | "UTILISATEUR"
-  | "MODERATEUR"
-  | "ADMINISTRATEUR";
+export type Role = "VISITEUR" | "UTILISATEUR" | "MODERATEUR" | "ADMINISTRATEUR";
 
 export type TypeResource = "ARTICLE" | "EXERCICE" | "FICHE_PRATIQUE";
 export type Visibilite = "PUBLIQUE" | "PRIVE";
@@ -92,12 +88,22 @@ export type UpdateJournalEntryInput = Partial<
 // Données calculées à partir de JournalEntry; elles ne sont pas un modèle Prisma.
 export type TrendSeriesPoint = Pick<
   JournalEntry,
-  | "date"
-  | "humeur"
-  | "energie"
-  | "qualite_sommeil"
-  | "anxiete_stress"
+  "date" | "humeur" | "energie" | "qualite_sommeil" | "anxiete_stress"
 >;
+
+export type MoyenneJourSemaine = {
+  jour: number;
+  humeur: number;
+  energie: number;
+  qualite_sommeil: number;
+  anxiete_stress: number;
+  total: number;
+};
+
+export type JournalStats = {
+  series: TrendSeriesPoint[];
+  moyennesParJour: MoyenneJourSemaine[];
+};
 
 export type TrendInsights = {
   observations: string[];

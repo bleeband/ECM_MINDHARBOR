@@ -1,10 +1,11 @@
 import { api } from "./axios";
+import axios from "axios";
 import type {
   CreateJournalEntryInput,
   JournalEntry,
+  JournalStats,
   Paginated,
   TrendInsights,
-  TrendSeriesPoint,
   UpdateJournalEntryInput,
 } from "../types/types";
 
@@ -19,12 +20,20 @@ export async function getJournal(page = 1): Promise<Paginated<JournalEntry>> {
   return data;
 }
 
-export async function getTodayJournal(date: string): Promise<JournalEntry | null> {
-  const { data } = await api.get<JournalEntry | null>("/journal/date", {
-    params: { date },
-  });
+export async function getTodayJournal(
+  date: string,
+): Promise<JournalEntry | null> {
+  try {
+    const { data } = await api.get<JournalEntry>(`/journal/${date}`);
 
-  return data;
+    return data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      return null;
+    }
+
+    throw error;
+  }
 }
 
 export async function upsertJournal(
@@ -39,17 +48,15 @@ export async function updateJournal(
   date: string,
   payload: UpdateJournalEntryInput,
 ): Promise<JournalEntry> {
-  const { data } = await api.patch<JournalEntry>("/journal/date", payload, {
-    params: { date },
-  });
+  const { data } = await api.patch<JournalEntry>(`/journal/${date}`, payload);
 
   return data;
 }
 
-export async function getStats(range: "7d" | "30d" | "90d"): Promise<{ series: TrendSeriesPoint[] }> {
-  const { data } = await api.get<{
-    series: TrendSeriesPoint[];
-  }>("/journal/stats", {
+export async function getStats(
+  range: "7d" | "30d" | "90d",
+): Promise<JournalStats> {
+  const { data } = await api.get<JournalStats>("/journal/stats", {
     params: { range },
   });
 

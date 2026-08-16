@@ -1,11 +1,20 @@
-import { useState, type FormEvent } from "react";
-import { upsertJournal } from "../../api/journal";
+import { useEffect, useState, type FormEvent } from "react";
+import {
+  getTodayJournal,
+  updateJournal,
+  upsertJournal,
+} from "../../api/journal";
 import type { CreateJournalEntryInput } from "../../types/types";
 
 type JournalForm = CreateJournalEntryInput;
 
 function today() {
-  return new Date().toISOString().slice(0, 10);
+  return new Intl.DateTimeFormat("fr-CA", {
+    timeZone: "America/Toronto",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
 }
 
 export default function JournalPage() {
@@ -22,13 +31,41 @@ export default function JournalPage() {
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
+  const [journalExiste, setJournalExiste] = useState(false);
+
+  useEffect(() => {
+    async function chargerJournalDuJour() {
+      try {
+        const entree = await getTodayJournal(today());
+
+        if (!entree) {
+          return;
+        }
+
+        setJournalExiste(true);
+
+        setForm({
+          date: today(),
+          humeur: entree.humeur,
+          energie: entree.energie,
+          qualite_sommeil: entree.qualite_sommeil,
+          anxiete_stress: entree.anxiete_stress,
+          evenements: entree.evenements,
+          gratitude: entree.gratitude ?? "",
+          activityIds: entree.activities.map(
+            (journalActivity) => journalActivity.activityId,
+          ),
+        });
+      } catch {
+        setError("Impossible de charger votre journal du jour.");
+      }
+    }
+
+    void chargerJournalDuJour();
+  }, []);
 
   function updateScale(
-    field:
-      | "humeur"
-      | "energie"
-      | "qualite_sommeil"
-      | "anxiete_stress",
+    field: "humeur" | "energie" | "qualite_sommeil" | "anxiete_stress",
     value: number,
   ) {
     setForm((current) => ({ ...current, [field]: value }));
@@ -60,12 +97,26 @@ export default function JournalPage() {
 
     try {
       setSaving(true);
-      await upsertJournal({
+
+      const payload = {
         ...form,
         evenements: form.evenements.trim(),
         gratitude: form.gratitude?.trim() || undefined,
-      });
-      setSuccess("Votre journal du jour a été enregistré.");
+      };
+
+      if (journalExiste) {
+        const { date, ...modifications } = payload;
+
+        await updateJournal(date, modifications);
+
+        setSuccess("Votre journal du jour a été modifié.");
+      } else {
+        await upsertJournal(payload);
+
+        setJournalExiste(true);
+
+        setSuccess("Votre journal du jour a été enregistré.");
+      }
     } catch {
       setError("Impossible d'enregistrer votre journal.");
     } finally {
@@ -90,9 +141,7 @@ export default function JournalPage() {
               <input
                 type="date"
                 value={form.date}
-                onChange={(event) =>
-                  setForm((current) => ({ ...current, date: event.target.value }))
-                }
+                readOnly
                 className="rounded-xl border border-slate-300 px-4 py-3"
               />
             </label>
@@ -121,11 +170,15 @@ export default function JournalPage() {
 
           <section className="space-y-6">
             <label className="block">
-              <span className="mb-2 block font-semibold">Événements marquants</span>
+              <span className="mb-2 block font-semibold">
+                Événements marquants
+              </span>
               <textarea
                 required
                 value={form.evenements}
-                onChange={(event) => updateText("evenements", event.target.value)}
+                onChange={(event) =>
+                  updateText("evenements", event.target.value)
+                }
                 rows={8}
                 className="w-full resize-none rounded-xl border border-slate-300 p-4"
               />
@@ -137,16 +190,13 @@ export default function JournalPage() {
               </span>
               <textarea
                 value={form.gratitude}
-                onChange={(event) => updateText("gratitude", event.target.value)}
+                onChange={(event) =>
+                  updateText("gratitude", event.target.value)
+                }
                 rows={6}
                 className="w-full resize-none rounded-xl border border-slate-300 p-4"
               />
             </label>
-
-            <p className="text-sm text-slate-600">
-              Les activités doivent être envoyées comme identifiants `Activity.id`
-              lorsque l'API des activités sera disponible.
-            </p>
           </section>
 
           <div className="lg:col-span-2">
