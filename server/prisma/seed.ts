@@ -57,11 +57,11 @@ for (let i: number = 0; i < 90; i += 1) {
       energie: getRandomInt(1, 5),
       qualite_sommeil: getRandomInt(1, 5),
       anxiete_stress: getRandomInt(1, 5),
-      evenements: evenementsListe[getRandomInt(0, evenementsListe.length - 1)],
+      evenements: evenementsListe[getRandomInt(0, evenementsListe.length - 1)]!,
       userId: "cmsttqsje0000i4vuahfp43bh",
       activities: {
         create: [
-          { activityId: activities[getRandomInt(0, activities.length - 1)].id },
+          { activityId: activities[getRandomInt(0, activities.length - 1)]!.id },
         ],
       },
     },

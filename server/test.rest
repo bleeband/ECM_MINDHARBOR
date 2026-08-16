@@ -1,15 +1,19 @@
+@baseUrl = http://localhost:3000/api/v1
+@email = charles@gmail.com
+@password = Qwerty123
+
 ### Inscription valide
-POST http://localhost:3000/api/v1/auth/register
+POST {{baseUrl}}/auth/register
 Content-Type: application/json
 
 {
-  "email": "charles@gmail.com",
-  "password": "Qwerty123",
+  "email": "{{email}}",
+  "password": "{{password}}",
   "pseudonyme": "Charles"
 }
 
-### Inscription invalide
-POST http://localhost:3000/api/v1/auth/register
+### Inscription invalide - validation Zod
+POST {{baseUrl}}/auth/register
 Content-Type: application/json
 
 {
@@ -18,42 +22,157 @@ Content-Type: application/json
   "pseudonyme": "Charles"
 }
 
-### Refresh invalide (body vide)
-POST http://localhost:3000/api/v1/auth/refresh
+
+### Login valide (attribue le nom login a cette requetes pour chercher les tokens directement par la suite)
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+### Access/Refresh token ajouter automatiquement
+@accessToken = {{login.response.body.$.accessToken}}
+@refreshToken = {{login.response.body.$.refreshToken}}
+
+### Login invalide
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "Mauvais123"
+}
+
+### Me avec access token
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{accessToken}}
+
+### Me sans token
+GET {{baseUrl}}/auth/me
+
+### Refresh invalide - body vide
+POST {{baseUrl}}/auth/refresh
 Content-Type: application/json
 
 {
   "refreshToken": ""
 }
 
-### Refresh token invalide
-POST http://localhost:3000/api/v1/auth/refresh
+### Refresh invalide - faux JWT
+POST {{baseUrl}}/auth/refresh
 Content-Type: application/json
 
 {
   "refreshToken": "test"
 }
 
-### Login valide
-POST http://localhost:3000/api/v1/auth/login
-Content-Type: application/json
-
-{
-  "email": "charles@gmail.com",
-  "password": "Qwerty123"
-}
-
-### Me avec access token
-GET http://localhost:3000/api/v1/auth/me
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbXN0dHFzamUwMDAwaTR2dWFoZnA0M2JoIiwicm9sZSI6IlVUSUxJU0FURVVSIiwiaWF0IjoxNzg2NzY1Nzg1LCJleHAiOjE3ODY3NjY2ODV9.NEDOtwpYQ2eV1PZWwrncHwjByWxuoydEhwAIP48fEJk
-
-### Me sans token
-GET http://localhost:3000/api/v1/auth/me
-
 ### Refresh valide
-POST http://localhost:3000/api/v1/auth/refresh
+POST {{baseUrl}}/auth/refresh
 Content-Type: application/json
 
 {
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbXN0dHFzamUwMDAwaTR2dWFoZnA0M2JoIiwicm9sZSI6IlVUSUxJU0FURVVSIiwiaWF0IjoxNzg2NzY1OTk4LCJleHAiOjE3ODczNzA3OTh9.BDoT4KGmcwVwPky8OQTBeRmYTJBzAGQ25Pl9j8oaQ7M"
+  "refreshToken": "{{refreshToken}}"
 }
+
+### Logout valide
+POST {{baseUrl}}/auth/logout
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+### Refresh après logout
+POST {{baseUrl}}/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+### Créer une entrée journal
+POST {{baseUrl}}/journal
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "date": "2026-09-15",
+  "humeur": 4,
+  "energie": 3,
+  "qualite_sommeil": 4,
+  "anxiete_stress": 2,
+  "evenements": "EVENEMENT TEST",
+  "gratitude": "GRATITUDE TEST"
+}
+
+### Liste des activités  (public)
+GET {{baseUrl}}/activities
+
+### Journal avec activités
+POST {{baseUrl}}/journal
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "date": "2026-05-02",
+  "humeur": 4,
+  "energie": 4,
+  "qualite_sommeil": 3,
+  "anxiete_stress": 2,
+  "evenements": "TEST EVENEMENT",
+  "gratitude": "TEST GRATITUDE",
+  "activityIds": [
+    "cmsv2spie0000zwv5smr56be6",
+    "cmsv2spif0003zwv5c34e5v3i"
+  ]
+}
+
+### Liste du journal - page 1
+GET {{baseUrl}}/journal?page=1&limit=20
+Authorization: Bearer {{accessToken}}
+
+### Liste du journal - page 2
+GET {{baseUrl}}/journal?page=2&limit=20
+Authorization: Bearer {{accessToken}}
+
+### Lire journal par date
+GET {{baseUrl}}/journal/2026-08-15
+Authorization: Bearer {{accessToken}}
+
+### Journal date invalide
+GET {{baseUrl}}/journal/date?date=allo
+Authorization: Bearer {{accessToken}}
+
+### Modifier journal du jour
+PATCH {{baseUrl}}/journal/2026-08-15
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "humeur": 5
+}
+
+### Modifier ancien journal - interdit
+PATCH {{baseUrl}}/journal/2026-05-02
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "humeur": 5
+}
+
+### Stats 30 jours
+GET {{baseUrl}}/journal/stats?range=30d
+Authorization: Bearer {{accessToken}}
+
+### Stats 7 jours
+GET {{baseUrl}}/journal/stats?range=7d
+Authorization: Bearer {{accessToken}}
+
+### Insights du journal
+GET {{baseUrl}}/journal/insights
+Authorization: Bearer {{accessToken}}

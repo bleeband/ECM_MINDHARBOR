@@ -113,11 +113,12 @@ export function sauvegarderRefreshToken(
   });
 }
 
-// supprimer le token de la BD
-export function supprimerRefreshToken(token: string) {
+// supprimer le token de la BD avec check que sa vien du bon user
+export function supprimerRefreshToken(token: string, userId: string) {
   return prisma.refreshToken.deleteMany({
     where: {
       token,
+      userId,
     },
   });
 }
