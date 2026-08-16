@@ -145,6 +145,17 @@ export type Group = {
   nom: string;
   description: string;
   createdAt: string;
+
+  creatorId: string | null;
+
+  // retourne par GET /groups/:id
+  isMember?: boolean;
+  isOwner?: boolean;
+};
+
+export type CreateGroupInput = {
+  nom: string;
+  description: string;
 };
 
 export type GroupMember = {

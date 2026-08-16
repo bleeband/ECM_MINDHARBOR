@@ -176,3 +176,42 @@ Authorization: Bearer {{accessToken}}
 ### Insights du journal
 GET {{baseUrl}}/journal/insights
 Authorization: Bearer {{accessToken}}
+
+
+### Creer un groupe
+POST {{baseUrl}}/groups
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "nom": "Anxiete sociale",
+  "description": "Un groupe pour jaser et sentraider."
+}
+
+### Liste groupes
+GET {{baseUrl}}/groups
+
+### Detail groupe
+GET {{baseUrl}}/groups/cmsweyacj00018cvukhkluu6s
+
+### Rejoindre groupe
+POST {{baseUrl}}/groups/cmsweyacj00018cvukhkluu6s/join
+Authorization: Bearer {{accessToken}}
+
+### Creer un post dans le groupe
+POST {{baseUrl}}/groups/cmsweyacj00018cvukhkluu6s/posts
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "titre": "Premiere publication",
+  "contenu": "Salut tout le monde, ceci est mon premier post."
+}
+
+### Posts groupe
+GET {{baseUrl}}/groups/cmsweyacj00018cvukhkluu6s/posts
+
+
+### Supprimer mon post
+DELETE {{baseUrl}}/posts/cmswffb0h0000sovubsi0esue
+Authorization: Bearer {{accessToken}}
