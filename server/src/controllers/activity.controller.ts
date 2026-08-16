@@ -9,6 +9,7 @@ export async function getActivities(
   try {
     const activities = await obtenirActivites();
 
+    // retourne la liste des activites au frontend
     res.status(200).json(activities);
   } catch (error) {
     next(error);

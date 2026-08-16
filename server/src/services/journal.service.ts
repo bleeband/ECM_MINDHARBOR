@@ -11,8 +11,10 @@ export async function creerEntreeJournal(
 ) {
   const date = new Date(`${data.date}T00:00:00.000Z`);
 
+  // check si ya deja une entree pour ce user a cette date
   const entreeExistante = await prisma.journalEntry.findUnique({
     where: {
+      // userId + date pour que sa sois unique, chaque user peut avoir juste une entree par jour
       userId_date: {
         userId,
         date,
@@ -37,8 +39,10 @@ export async function creerEntreeJournal(
       qualite_sommeil: data.qualite_sommeil,
       anxiete_stress: data.anxiete_stress,
       evenements: data.evenements,
+      // Prisma veut null si gratitude est pas remplie et pas undefined
       gratitude: data.gratitude ?? null,
 
+      // cree les liens avec les activites choisi
       activities: {
         create: (data.activityIds ?? []).map((activityId) => ({
           activityId,
@@ -61,6 +65,7 @@ export async function obtenirJournal(
   skip: number,
   take: number,
 ) {
+  // va chercher la page demander + le total dentree
   const [entries, total] = await prisma.$transaction([
     prisma.journalEntry.findMany({
       where: {
@@ -93,6 +98,7 @@ export async function obtenirJournal(
   };
 }
 
+// cherche avec le userId aussi pour pas aller chercher le journal dun autre user
 export async function obtenirEntreeParDate(userId: string, dateString: string) {
   const date = new Date(`${dateString}T00:00:00.000Z`);
 
@@ -129,6 +135,7 @@ export async function modifierEntreeJournal(
   data: UpdateJournalInput,
 ) {
   const date = new Date(`${dateString}T00:00:00.000Z`);
+  // on peut modifier une entree seulement la journee meme
   if (dateString !== obtenirDateAujourdhui()) {
     throw new AppError(
       403,
@@ -162,6 +169,7 @@ export async function modifierEntreeJournal(
       },
     },
 
+    // ajoute seulement les champs qui ont vraiment ete envoyer
     data: {
       ...(data.humeur !== undefined && {
         humeur: data.humeur,
@@ -188,6 +196,7 @@ export async function modifierEntreeJournal(
       }),
 
       ...(data.activityIds !== undefined && {
+        // remplace les anciennes activites par les nouvelles choisi
         activities: {
           deleteMany: {},
           create: data.activityIds.map((activityId) => ({
@@ -207,6 +216,7 @@ export async function modifierEntreeJournal(
   });
 }
 
+// prend la date du Quebec au lieu de UTC
 function obtenirDateAujourdhui() {
   return new Intl.DateTimeFormat("fr-CA", {
     timeZone: "America/Toronto",
@@ -239,8 +249,10 @@ export async function obtenirStatsJournal(
 
   const dateDebut = new Date(`${aujourdHui}T00:00:00.000Z`);
 
+  // recule la date selon le range choisi 7, 30 ou 90 jours
   dateDebut.setUTCDate(dateDebut.getUTCDate() - (jours - 1));
 
+  // calcule les moyennes par jour directement dans la BD
   const stats = await prisma.journalEntry.groupBy({
     by: ["date"],
 
@@ -263,6 +275,8 @@ export async function obtenirStatsJournal(
     },
   });
 
+  // calcule les moyennes pour chaque jour de la semaine
+  // les ::float et ::int convertissent les valeurs SQL en nombres JS simples
   const moyennesParJour = await prisma.$queryRaw<MoyenneJourSemaine[]>`
     SELECT
       EXTRACT(ISODOW FROM "date")::int AS "jour",
@@ -303,11 +317,13 @@ export async function obtenirInsightsJournal(userId: string) {
   const observations: string[] = [];
   const correlations: string[] = [];
 
+  // compare lanxiete avec et sans chaque activite
   for (const activity of activities) {
     const avecActivite = await prisma.journalEntry.aggregate({
       where: {
         userId,
         activities: {
+          // some = entree avec lactivite, none = entree sans lactivite
           some: {
             activityId: activity.id,
           },
@@ -325,6 +341,7 @@ export async function obtenirInsightsJournal(userId: string) {
       where: {
         userId,
         activities: {
+          // some = entree avec lactivite, none = entree sans lactivite
           none: {
             activityId: activity.id,
           },
@@ -338,6 +355,7 @@ export async function obtenirInsightsJournal(userId: string) {
       },
     });
 
+    // faut au moins 5 entree de chaque cote avant de tirer une conclusion
     if (
       avecActivite._count.id >= 5 &&
       sansActivite._count.id >= 5 &&
@@ -347,8 +365,10 @@ export async function obtenirInsightsJournal(userId: string) {
       const avec = avecActivite._avg.anxiete_stress;
       const sans = sansActivite._avg.anxiete_stress;
 
+      // calcule le pourcentage de difference avec et sans lactivite
       const difference = Math.round(((sans - avec) / sans) * 100);
 
+      // affiche une correlation seulement si la difference est assez importante
       if (difference >= 10) {
         correlations.push(
           `Les jours avec l'activité ${activity.nom}, votre anxiété est en moyenne ${difference} % plus basse.`,
@@ -389,6 +409,7 @@ export async function obtenirInsightsJournal(userId: string) {
     }
   }
 
+  // garde juste les jours de semaine qui ont au moins 5 entree au total
   const moyennesParJour = await prisma.$queryRaw<MoyenneJourSemaine[]>`
     SELECT
       EXTRACT(ISODOW FROM "date")::int AS "jour",
@@ -415,6 +436,7 @@ export async function obtenirInsightsJournal(userId: string) {
     "dimanche",
   ];
 
+  // trouve le jour avec lhumeur la plus basse et lanxiete la plus haute
   if (moyennesParJour.length > 0) {
     const humeurPlusBasse = moyennesParJour.reduce((plusBasse, jour) =>
       jour.humeur < plusBasse.humeur ? jour : plusBasse,

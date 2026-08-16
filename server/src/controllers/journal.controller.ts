@@ -21,6 +21,7 @@ export async function createJournal(
   next: NextFunction,
 ) {
   try {
+    // prend le user connecter directement du token
     const entree = await creerEntreeJournal(
       req.user!.userId,
       req.body as CreateJournalInput,
@@ -38,6 +39,7 @@ export async function getJournal(
   next: NextFunction,
 ) {
   try {
+    // transforme page et limit en skip/take pour Prisma
     const { page, limit, skip, take } = parsePagination(req.query);
 
     const { entries, total } = await obtenirJournal(
@@ -55,6 +57,7 @@ export async function getJournal(
   }
 }
 
+// la date vient directement de /journal/:date
 export async function getJournalByDate(
   req: Request,
   res: Response,
@@ -71,6 +74,7 @@ export async function getJournalByDate(
   }
 }
 
+// envoie seulement les champs a modifier au service
 export async function updateJournal(
   req: Request,
   res: Response,
@@ -97,6 +101,7 @@ export async function getJournalStats(
   next: NextFunction,
 ) {
   try {
+    // range peut etre 7d, 30d ou 90d
     const { range } = req.query as unknown as JournalStatsQuery;
 
     const stats = await obtenirStatsJournal(req.user!.userId, range);
@@ -113,6 +118,7 @@ export async function getJournalInsights(
   next: NextFunction,
 ) {
   try {
+    // requireAuth a deja verifier le token donc req.user existe ici
     const insights = await obtenirInsightsJournal(req.user!.userId);
 
     res.status(200).json(insights);
