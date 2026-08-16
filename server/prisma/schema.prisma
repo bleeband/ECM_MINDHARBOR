@@ -31,6 +31,8 @@ model User {
     messagesRecus Message[] @relation("MessagesRecus")
     signalementsEmis Report[] @relation("SignalementsEmis")
     signalementsRecus Report[] @relation("SignalementsRecus")
+    // groupes que ce user a cree
+    groupesCrees Group[] @relation("GroupCreator")
 
 }
 
@@ -102,10 +104,12 @@ model Group {
     description String
     createdAt DateTime @default(now())
 
+    // garde qui a cree le groupe pour pouvoir le supprimer
+    creatorId String?
+    creator User? @relation("GroupCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+
     posts Post[]
     groupMembers GroupMember[]
-
-
 }
 
 model GroupMember {

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { z } from "zod";
-import { requireAuth } from "../middlewares/auth.js";
+import { optionalAuth, requireAuth } from "../middlewares/auth.js";
 import { AppError } from "../middlewares/error.js";
 import prisma from "../utils/prisma.js";
 import { buildMeta, parsePagination } from "../utils/paginate.js";
@@ -13,9 +13,18 @@ const createPostSchema = z.object({
   visibilite: z.enum(["PUBLIQUE", "PRIVE"]).optional(),
 });
 
+const createGroupSchema = z.object({
+  nom: z.string().trim().min(2).max(100),
+  description: z.string().trim().min(2).max(1000),
+});
+
 function parseGroupId(value: unknown) {
   if (typeof value !== "string" || value.length === 0) {
-    throw new AppError(400, "INVALID_GROUP_ID", "Identifiant de groupe invalide.");
+    throw new AppError(
+      400,
+      "INVALID_GROUP_ID",
+      "Identifiant de groupe invalide.",
+    );
   }
 
   return value;
@@ -55,8 +64,9 @@ router.get("/", async (req, res, next) => {
   try {
     const { page, limit, skip, take } = parsePagination(req.query);
     const q = String(req.query.q ?? "").trim();
-    const where = q
-      ? {
+    const where =
+      q ?
+        {
           OR: [
             { nom: { contains: q, mode: "insensitive" as const } },
             { description: { contains: q, mode: "insensitive" as const } },
@@ -79,10 +89,31 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-router.get("/:id", async (req, res, next) => {
+router.get("/:id", optionalAuth, async (req, res, next) => {
   try {
-    const group = await ensureGroupExists(parseGroupId(req.params.id));
-    res.json(group);
+    const groupId = parseGroupId(req.params.id);
+    const group = await ensureGroupExists(groupId);
+
+    let membership = null;
+
+    if (req.user) {
+      membership = await prisma.groupMember.findUnique({
+        where: {
+          userId_groupId: {
+            userId: req.user.userId,
+            groupId,
+          },
+        },
+      });
+    }
+
+    res.json({
+      ...group,
+
+      // aide le frontend a savoir quel bouton afficher
+      isMember: membership?.statutDemande === "ACCEPTEE",
+      isOwner: group.creatorId === req.user?.userId,
+    });
   } catch (error) {
     next(error);
   }
@@ -114,6 +145,84 @@ router.post("/:id/join", requireAuth, async (req, res, next) => {
   }
 });
 
+router.post("/", requireAuth, async (req, res, next) => {
+  try {
+    const result = createGroupSchema.safeParse(req.body);
+
+    if (!result.success) {
+      throw new AppError(400, "VALIDATION_ERROR", "Groupe invalide.");
+    }
+
+    // cree le groupe
+    const group = await prisma.group.create({
+      data: {
+        nom: result.data.nom,
+        description: result.data.description,
+
+        creatorId: req.user!.userId,
+
+        // le createur est membre direct de son groupe
+        groupMembers: {
+          create: {
+            userId: req.user!.userId,
+            statutDemande: "ACCEPTEE",
+          },
+        },
+      },
+    });
+
+    res.status(201).json(group);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.delete("/:id/leave", requireAuth, async (req, res, next) => {
+  try {
+    const groupId = parseGroupId(req.params.id);
+
+    await ensureGroupExists(groupId);
+
+    // enleve juste le user connecter des membres
+    await prisma.groupMember.deleteMany({
+      where: {
+        groupId,
+        userId: req.user!.userId,
+      },
+    });
+
+    res.status(204).send();
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.delete("/:id", requireAuth, async (req, res, next) => {
+  try {
+    const groupId = parseGroupId(req.params.id);
+    const group = await ensureGroupExists(groupId);
+
+    // juste le createur peut supprimer son groupe
+    if (group.creatorId !== req.user!.userId) {
+      throw new AppError(
+        403,
+        "FORBIDDEN",
+        "Vous ne pouvez pas supprimer ce groupe.",
+      );
+    }
+
+    await prisma.group.delete({
+      where: {
+        id: groupId,
+      },
+    });
+
+    res.status(204).send();
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.get("/:id/posts", async (req, res, next) => {
   try {
     const groupId = parseGroupId(req.params.id);
@@ -126,6 +235,21 @@ router.get("/:id/posts", async (req, res, next) => {
         include: {
           author: {
             select: { id: true, username: true },
+          },
+
+          // ramene aussi les commentaires avec chaque post
+          comments: {
+            include: {
+              author: {
+                select: {
+                  id: true,
+                  username: true,
+                },
+              },
+            },
+            orderBy: {
+              createdAt: "asc",
+            },
           },
         },
         orderBy: { createdAt: "desc" },
@@ -180,6 +304,46 @@ router.post("/:id/posts", requireAuth, async (req, res, next) => {
     });
 
     res.status(201).json(post);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.delete("/:id", requireAuth, async (req, res, next) => {
+  try {
+    const postId = req.params.id;
+
+    // sassure que le id est bien valide
+    if (typeof postId !== "string") {
+      throw new AppError(400, "INVALID_POST_ID", "Id de publication invalide.");
+    }
+
+    const post = await prisma.post.findUnique({
+      where: {
+        id: postId,
+      },
+    });
+
+    if (!post) {
+      throw new AppError(404, "POST_NOT_FOUND", "Publication introuvable.");
+    }
+
+    // un user peut supprimer juste ses propres posts
+    if (post.authorId !== req.user!.userId) {
+      throw new AppError(
+        403,
+        "FORBIDDEN",
+        "Vous ne pouvez pas supprimer cette publication.",
+      );
+    }
+
+    await prisma.post.delete({
+      where: {
+        id: postId,
+      },
+    });
+
+    res.status(204).send();
   } catch (error) {
     next(error);
   }

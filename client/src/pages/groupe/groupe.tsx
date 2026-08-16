@@ -1,42 +1,143 @@
-import { HeartHandshake, Wrench } from "lucide-react";
-import { Link } from "react-router-dom";
+import { useEffect, useState, type FormEvent } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { createGroup, getGroups } from "../../api/groupe";
+import type { Group } from "../../types/types";
 
 export default function Groupe() {
+  const navigate = useNavigate();
+
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [nom, setNom] = useState("");
+  const [description, setDescription] = useState("");
+
+  useEffect(() => {
+    async function loadGroups() {
+      const result = await getGroups();
+
+      setGroups(result.data);
+    }
+
+    void loadGroups();
+  }, []);
+
+  async function onCreate(event: FormEvent) {
+    event.preventDefault();
+
+    if (!nom.trim() || !description.trim()) {
+      return;
+    }
+
+    const group = await createGroup({
+      nom: nom.trim(),
+      description: description.trim(),
+    });
+
+    // ouvre directement le groupe qui vient detre cree
+    navigate(`/groupe/${group.id}`);
+  }
+
   return (
-    <main className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-slate-50 px-4 py-12">
-      <section className="w-full max-w-xl border border-sky-200 bg-white p-8 text-center shadow-sm sm:p-12">
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-sky-100 text-sky-700">
-          <Wrench className="h-9 w-9" />
-        </div>
+    <main className="min-h-screen bg-slate-50 text-slate-900">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <section className="mb-8">
+          <p className="text-sm font-semibold text-sky-700">
+            Espaces de soutien
+          </p>
 
-        <p className="mt-6 text-sm font-semibold text-sky-700">
-          Bientôt disponible
-        </p>
-        <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-          Les groupes se préparent
-        </h1>
-        <p className="mx-auto mt-4 max-w-md text-base leading-7 text-slate-600">
-          On construit un petit coin bienveillant pour échanger, s'encourager et
-          avancer ensemble, à son rythme.
-        </p>
+          <h1 className="mt-1 text-3xl font-bold">Groupes</h1>
 
-        <div className="mt-8 rounded-xl bg-sky-50 p-5 text-left">
-          <div className="flex gap-3">
-            <HeartHandshake className="mt-0.5 h-5 w-5 shrink-0 text-sky-700" />
-            <p className="text-sm leading-6 text-slate-700">
-              Reviens bientôt : les premiers espaces de soutien arrivent très
-              prochainement.
+          <p className="mt-2 max-w-2xl text-slate-600">
+            Créez un groupe ou rejoignez un espace pour échanger avec les
+            autres.
+          </p>
+        </section>
+
+        <div className="grid gap-6 lg:grid-cols-[360px_1fr]">
+          <section className="h-fit rounded-3xl border border-slate-200 bg-white p-6">
+            <h2 className="text-xl font-bold">Créer un groupe</h2>
+
+            <p className="mt-1 text-sm text-slate-600">
+              Créez votre propre espace de discussion.
             </p>
-          </div>
-        </div>
 
-        <Link
-          to="/dashboard"
-          className="mt-8 inline-flex rounded-xl bg-sky-700 px-5 py-3 font-semibold text-white transition hover:bg-sky-800"
-        >
-          Retour au tableau de bord
-        </Link>
-      </section>
+            <form onSubmit={onCreate} className="mt-6 space-y-4">
+              <label className="block">
+                <span className="mb-2 block text-sm font-semibold">
+                  Nom du groupe
+                </span>
+
+                <input
+                  value={nom}
+                  onChange={(event) => setNom(event.target.value)}
+                  placeholder="Ex. Mieux vivre avec l'anxiété"
+                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-sky-700"
+                />
+              </label>
+
+              <label className="block">
+                <span className="mb-2 block text-sm font-semibold">
+                  Description
+                </span>
+
+                <textarea
+                  value={description}
+                  onChange={(event) => setDescription(event.target.value)}
+                  placeholder="Décrivez rapidement le groupe..."
+                  rows={5}
+                  className="w-full resize-none rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-sky-700"
+                />
+              </label>
+
+              <button
+                type="submit"
+                disabled={!nom.trim() || !description.trim()}
+                className="w-full rounded-xl bg-sky-700 px-5 py-3 font-semibold text-white transition hover:bg-sky-800 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Créer le groupe
+              </button>
+            </form>
+          </section>
+
+          <section>
+            <div className="mb-5">
+              <h2 className="text-xl font-bold">Groupes disponibles</h2>
+
+              <p className="mt-1 text-sm text-slate-600">
+                Ouvrez un groupe pour voir les publications ou le rejoindre.
+              </p>
+            </div>
+
+            {groups.length > 0 ?
+              <div className="grid gap-4 md:grid-cols-2">
+                {groups.map((group) => (
+                  <Link
+                    key={group.id}
+                    to={`/groupe/${group.id}`}
+                    className="rounded-3xl border border-slate-200 bg-white p-6 transition hover:border-sky-200 hover:shadow-sm"
+                  >
+                    <h2 className="text-xl font-bold">{group.nom}</h2>
+
+                    <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-600">
+                      {group.description}
+                    </p>
+
+                    <span className="mt-5 inline-block text-sm font-semibold text-sky-700">
+                      Ouvrir le groupe →
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            : <div className="rounded-3xl border border-slate-200 bg-white p-8 text-center">
+                <h2 className="text-lg font-bold">Aucun groupe</h2>
+
+                <p className="mt-2 text-sm text-slate-600">
+                  Créez le premier groupe pour commencer.
+                </p>
+              </div>
+            }
+          </section>
+        </div>
+      </div>
     </main>
   );
 }
