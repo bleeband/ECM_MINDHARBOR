@@ -3,12 +3,15 @@ import type {
   CreateJournalInput,
   JournalDateParams,
   UpdateJournalInput,
+  JournalStatsQuery,
 } from "../schemas/journal.schema.js";
 import {
   creerEntreeJournal,
   obtenirJournal,
   obtenirEntreeParDate,
   modifierEntreeJournal,
+  obtenirStatsJournal,
+  obtenirInsightsJournal,
 } from "../services/journal.service.js";
 import { parsePagination, buildMeta } from "../utils/paginate.js";
 
@@ -83,6 +86,36 @@ export async function updateJournal(
     );
 
     res.status(200).json(entree);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getJournalStats(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const { range } = req.query as unknown as JournalStatsQuery;
+
+    const stats = await obtenirStatsJournal(req.user!.userId, range);
+
+    res.status(200).json(stats);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getJournalInsights(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const insights = await obtenirInsightsJournal(req.user!.userId);
+
+    res.status(200).json(insights);
   } catch (error) {
     next(error);
   }

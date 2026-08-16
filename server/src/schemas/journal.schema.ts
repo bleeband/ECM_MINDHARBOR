@@ -48,6 +48,17 @@ export const createJournalSchema = z.object({
   query: z.object({}),
 });
 
+const statsQuerySchema = z.object({
+  range: z.enum(["7d", "30d", "90d"]).default("30d"),
+});
+
+export const journalStatsSchema = z.object({
+  body: z.object({}).optional(),
+  params: z.object({}),
+  query: statsQuerySchema,
+});
+
+export type JournalStatsQuery = z.infer<typeof statsQuerySchema>;
 export type CreateJournalInput = z.infer<typeof journalBodySchema>;
 export type JournalDateParams = z.infer<typeof dateParamsSchema>;
 export type UpdateJournalInput = z.infer<typeof updateJournalBodySchema>;

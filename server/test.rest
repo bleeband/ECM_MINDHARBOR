@@ -164,3 +164,15 @@ Content-Type: application/json
 {
   "humeur": 5
 }
+
+### Stats 30 jours
+GET {{baseUrl}}/journal/stats?range=30d
+Authorization: Bearer {{accessToken}}
+
+### Stats 7 jours
+GET {{baseUrl}}/journal/stats?range=7d
+Authorization: Bearer {{accessToken}}
+
+### Insights du journal
+GET {{baseUrl}}/journal/insights
+Authorization: Bearer {{accessToken}}
