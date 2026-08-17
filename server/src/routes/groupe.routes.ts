@@ -20,11 +20,7 @@ const createGroupSchema = z.object({
 
 function parseGroupId(value: unknown) {
   if (typeof value !== "string" || value.length === 0) {
-    throw new AppError(
-      400,
-      "INVALID_GROUP_ID",
-      "Identifiant de groupe invalide.",
-    );
+    throw new AppError(400, "INVALID_GROUP_ID", "Identifiant de groupe invalide.");
   }
 
   return value;
@@ -51,6 +47,13 @@ function validatePost(body: unknown) {
 async function ensureGroupExists(groupId: string) {
   const group = await prisma.group.findUnique({
     where: { id: groupId },
+    select: {
+      id: true,
+      nom: true,
+      description: true,
+      createdAt: true,
+      creatorId: true,
+    },
   });
 
   if (!group) {
@@ -64,13 +67,9 @@ router.get("/", async (req, res, next) => {
   try {
     const { page, limit, skip, take } = parsePagination(req.query);
     const q = String(req.query.q ?? "").trim();
-    const where =
-      q ?
-        {
-          OR: [
-            { nom: { contains: q, mode: "insensitive" as const } },
-            { description: { contains: q, mode: "insensitive" as const } },
-          ],
+    const where = q
+      ? {
+          OR: [{ nom: { contains: q, mode: "insensitive" as const } }, { description: { contains: q, mode: "insensitive" as const } }],
         }
       : {};
     const [data, total] = await Promise.all([
@@ -204,11 +203,7 @@ router.delete("/:id", requireAuth, async (req, res, next) => {
 
     // juste le createur peut supprimer son groupe
     if (group.creatorId !== req.user!.userId) {
-      throw new AppError(
-        403,
-        "FORBIDDEN",
-        "Vous ne pouvez pas supprimer ce groupe.",
-      );
+      throw new AppError(403, "FORBIDDEN", "Vous ne pouvez pas supprimer ce groupe.");
     }
 
     await prisma.group.delete({
@@ -281,11 +276,7 @@ router.post("/:id/posts", requireAuth, async (req, res, next) => {
     });
 
     if (!membership || membership.statutDemande !== "ACCEPTEE") {
-      throw new AppError(
-        403,
-        "GROUP_MEMBERSHIP_REQUIRED",
-        "Vous devez être membre accepté du groupe pour publier.",
-      );
+      throw new AppError(403, "GROUP_MEMBERSHIP_REQUIRED", "Vous devez être membre accepté du groupe pour publier.");
     }
 
     const post = await prisma.post.create({
@@ -330,11 +321,7 @@ router.delete("/:id", requireAuth, async (req, res, next) => {
 
     // un user peut supprimer juste ses propres posts
     if (post.authorId !== req.user!.userId) {
-      throw new AppError(
-        403,
-        "FORBIDDEN",
-        "Vous ne pouvez pas supprimer cette publication.",
-      );
+      throw new AppError(403, "FORBIDDEN", "Vous ne pouvez pas supprimer cette publication.");
     }
 
     await prisma.post.delete({
